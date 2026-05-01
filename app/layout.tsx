@@ -30,7 +30,11 @@ export default function RootLayout({
       className={`${cabin.variable} ${inter.variable} h-full antialiased`}
     >
       {/* 👇 Default font = Inter */}
-      <body className="min-h-full flex flex-col font-inter">{children}</body>
+      <body className="min-h-screen bg-[#F7F8FA] flex justify-center">
+        <div className="w-full max-w-[420px] min-h-screen bg-white">
+          {children}
+        </div>
+      </body>
     </html>
   );
 }
