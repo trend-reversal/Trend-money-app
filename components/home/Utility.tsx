@@ -43,28 +43,26 @@ export default function Utility() {
       </div>
 
       {/* 🛡️ INFO CARDS (FIXED LAYOUT) */}
-      <div className="-mx-2">
-        <div className="grid grid-cols-2 gap-3 px-2">
+      <div className="-mx-2 overflow-x-auto">
+        <div className="flex gap-4 px-2">
           {/* 🔹 Security */}
-          <div className="relative h-[200px] rounded-[20px] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.15)]">
+          <div className="relative w-[260px] h-[280px] rounded-[24px] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.25)] flex-shrink-0">
             <Image
               src="/images/security.png"
               alt="security"
               fill
               className="object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
           </div>
 
           {/* 🔹 Management */}
-          <div className="relative h-[200px] rounded-[20px] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.15)]">
+          <div className="relative w-[260px] h-[280px] rounded-[24px] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.25)] flex-shrink-0">
             <Image
               src="/images/management.png"
               alt="management"
               fill
               className="object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
           </div>
         </div>
       </div>

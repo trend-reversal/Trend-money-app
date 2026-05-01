@@ -147,12 +147,23 @@ export default function BondsPage() {
         {bonds.map((item, i) => (
           <div
             key={i}
-            className="bg-white rounded-[16px] p-4 border border-[#F0F0F0] shadow-[0px_2px_8px_rgba(0,0,0,0.04)] space-y-3"
+            className="relative bg-white rounded-[16px] px-4 py-2 border border-[#F0F0F0] shadow-[0px_2px_8px_rgba(0,0,0,0.04)]"
           >
+            {/* TAG */}
+            <span
+              className={`absolute top-0 right-4 -translate-y-1/2 text-[10px] px-3 py-[4px] rounded-full ${
+                item.tag === "Trending"
+                  ? "bg-[#EDE9FE] text-purple-600"
+                  : "bg-[#ECFCF2] text-green-600"
+              }`}
+            >
+              {item.tag}
+            </span>
+
             {/* TOP */}
-            <div className="flex justify-between items-center">
-              <div className="flex gap-3 items-center">
-                <div className="w-[44px] h-[44px] relative">
+            <div className="flex justify-between items-start">
+              <div className="flex gap-3">
+                <div className="w-[42px] h-[42px] relative">
                   <Image
                     src={item.logo}
                     alt=""
@@ -162,7 +173,7 @@ export default function BondsPage() {
                 </div>
 
                 <div>
-                  <p className="text-[15px] font-semibold text-[#1C1B1B]">
+                  <p className="text-[15px] font-semibold text-[#1C1B1B] leading-tight">
                     {item.name}
                   </p>
                   <p className="text-[12px] text-gray-500 mt-[2px]">
@@ -172,42 +183,35 @@ export default function BondsPage() {
               </div>
 
               <div className="text-right leading-tight">
-                <p className="text-[#16A34A] font-semibold text-[20px]">
+                <p className="text-[#16A34A] font-semibold text-[18px]">
                   {item.rate}
                 </p>
-                <p className="text-[11px] text-gray-400 mt-[2px]">YTM</p>
+                <p className="text-[10px] text-gray-400 mt-[2px]">YTM</p>
               </div>
             </div>
 
             {/* MID */}
-            <p className="text-[13px] text-[#6B7280]">
+            <p className="text-[14px] text-[#6B7280] mt-1">
               Min. {item.min} • {item.tenure}
             </p>
 
             {/* RISK BAR */}
-            <div className="flex items-center gap-2">
+            <div className="mt-[2px] flex flex-col">
               <Image
                 src="/images/bond/risk-bar.png"
                 alt="risk"
-                width={56}
-                height={7}
+                width={60}
+                height={8}
+                className="object-contain"
               />
-              <span className="text-[10px] text-gray-500">CRISIL BBB</span>
+              <span className="text-[12px] text-gray-600 italic font-medium mt-[2px]">
+                CRISIL BBB
+              </span>
             </div>
 
-            {/* BOTTOM (FD STYLE) */}
-            <div className="flex justify-between items-center pt-1">
-              <span
-                className={`text-[10px] px-2 py-[3px] rounded-[6px] font-medium ${
-                  item.tag === "Trending"
-                    ? "bg-[#EDE9FE] text-purple-600"
-                    : "bg-[#ECFCF2] text-[#16A34A]"
-                }`}
-              >
-                {item.tag}
-              </span>
-
-              <button className="text-[13px] bg-[#EEF2FF] text-[#5B6FFF] px-4 py-[7px] rounded-[10px] font-medium">
+            {/* BUTTON */}
+            <div className="flex justify-end mt-2">
+              <button className="text-[14px] bg-[#EEF2FF] text-[#5B6FFF] px-6 py-2 rounded-[12px] font-medium">
                 View Details
               </button>
             </div>
