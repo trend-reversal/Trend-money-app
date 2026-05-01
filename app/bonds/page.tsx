@@ -34,6 +34,35 @@ export default function BondsPage() {
       tag: "Sell Anytime",
       logo: "/images/akara.png",
     },
+
+    // 👇 duplicate (to match UI)
+    {
+      name: "Best Capital",
+      rating: "AAA • Low Risk",
+      min: "₹9,918",
+      tenure: "35 Months",
+      rate: "13.65%",
+      tag: "Sell Anytime",
+      logo: "/images/best-capital.png",
+    },
+    {
+      name: "Unifinz Capital",
+      rating: "AA+ • Low Risk",
+      min: "₹49,987",
+      tenure: "14 Months",
+      rate: "13.50%",
+      tag: "Trending",
+      logo: "/images/unifize.png",
+    },
+    {
+      name: "Aakara Capitals",
+      rating: "AA • Moderate Risk",
+      min: "₹95,519",
+      tenure: "14 Months",
+      rate: "13.25%",
+      tag: "Sell Anytime",
+      logo: "/images/akara.png",
+    },
   ];
 
   return (
@@ -101,10 +130,10 @@ export default function BondsPage() {
           (f, i) => (
             <button
               key={i}
-              className={`px-4 py-2 rounded-[10px] text-[12px]  ${
+              className={`px-4 py-2 rounded-[10px] text-[12px] border ${
                 i === 0
-                  ? "bg-[#EEF2FF] text-[#5B6FFF]"
-                  : "bg-white border border-gray-200 text-gray-600"
+                  ? "bg-[#EEF2FF] text-[#5B6FFF] border-[#5B6FFF]"
+                  : "bg-white border-[#E5E7EB] text-gray-600"
               }`}
             >
               {f}
@@ -118,23 +147,12 @@ export default function BondsPage() {
         {bonds.map((item, i) => (
           <div
             key={i}
-            className="relative bg-white rounded-[16px] p-4 shadow-sm"
+            className="bg-white rounded-[16px] p-4 border border-[#F0F0F0] shadow-[0px_2px_8px_rgba(0,0,0,0.04)] space-y-3"
           >
-            {/* TAG */}
-            <span
-              className={`absolute top-0 right-4 -translate-y-1/2 text-[10px] px-3 py-[3px] rounded-full ${
-                item.tag === "Trending"
-                  ? "bg-[#EDE9FE] text-purple-600"
-                  : "bg-[#ECFCF2] text-green-600"
-              }`}
-            >
-              {item.tag}
-            </span>
-
             {/* TOP */}
-            <div className="flex justify-between items-start">
-              <div className="flex gap-3">
-                <div className="w-[40px] h-[40px] relative">
+            <div className="flex justify-between items-center">
+              <div className="flex gap-3 items-center">
+                <div className="w-[44px] h-[44px] relative">
                   <Image
                     src={item.logo}
                     alt=""
@@ -144,49 +162,54 @@ export default function BondsPage() {
                 </div>
 
                 <div>
-                  <p className="text-[14px] font-semibold">{item.name}</p>
-                  <p className="text-[11px] text-gray-500">{item.rating}</p>
+                  <p className="text-[15px] font-semibold text-[#1C1B1B]">
+                    {item.name}
+                  </p>
+                  <p className="text-[12px] text-gray-500 mt-[2px]">
+                    {item.rating}
+                  </p>
                 </div>
               </div>
 
-              <div className="text-right">
-                <p className="text-green-600 font-semibold text-[15px]">
+              <div className="text-right leading-tight">
+                <p className="text-[#16A34A] font-semibold text-[20px]">
                   {item.rate}
                 </p>
-                <p className="text-[10px] text-gray-400">YTM</p>
+                <p className="text-[11px] text-gray-400 mt-[2px]">YTM</p>
               </div>
             </div>
 
-            {/* BOTTOM */}
-            <div className="mt-3 flex flex-col">
-              {/* Top row */}
-              <div className="flex justify-between items-center">
-                <p className="text-[12px] text-gray-500">
-                  Min. {item.min} • {item.tenure}
-                </p>
-              </div>
+            {/* MID */}
+            <p className="text-[13px] text-[#6B7280]">
+              Min. {item.min} • {item.tenure}
+            </p>
 
-              {/* Button (niche shift) */}
-              <div className="flex justify-end mt-2">
-                <button className="text-[12px] bg-[#EEF2FF] text-[#5B6FFF] px-4 py-2 rounded-[8px]">
-                  View Details
-                </button>
-              </div>
-            </div>
-
-            {/* RATING BAR */}
-            <div className="mt-2 flex flex-col gap-[4px]">
-              {/* Image Bar */}
+            {/* RISK BAR */}
+            <div className="flex items-center gap-2">
               <Image
                 src="/images/bond/risk-bar.png"
                 alt="risk"
                 width={56}
                 height={7}
-                className="object-contain"
               />
-
-              {/* Label */}
               <span className="text-[10px] text-gray-500">CRISIL BBB</span>
+            </div>
+
+            {/* BOTTOM (FD STYLE) */}
+            <div className="flex justify-between items-center pt-1">
+              <span
+                className={`text-[10px] px-2 py-[3px] rounded-[6px] font-medium ${
+                  item.tag === "Trending"
+                    ? "bg-[#EDE9FE] text-purple-600"
+                    : "bg-[#ECFCF2] text-[#16A34A]"
+                }`}
+              >
+                {item.tag}
+              </span>
+
+              <button className="text-[13px] bg-[#EEF2FF] text-[#5B6FFF] px-4 py-[7px] rounded-[10px] font-medium">
+                View Details
+              </button>
             </div>
           </div>
         ))}

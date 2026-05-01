@@ -152,11 +152,11 @@ export default function FDPage() {
           {/* ICONS */}
           <div className="flex justify-center items-center gap-3 mt-4">
             {[
-              "/images/bank1.png",
-              "/images/bank2.png",
-              "/images/bank3.png",
-              "/images/bank4.png",
-              "/images/bank5.png",
+              "/images/fd/state-bank.svg",
+              "/images/fd/hdfc.svg",
+              "/images/fd/icici.svg",
+              "/images/fd/axis.svg",
+              "/images/fd/kotak.svg",
             ].map((icon, i) => (
               <div
                 key={i}
