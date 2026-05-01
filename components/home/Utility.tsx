@@ -4,7 +4,7 @@ import Image from "next/image";
 
 export default function Utility() {
   return (
-    <section className="px-6 mt-6 space-y-6">
+    <section className="px-4 mt-6 space-y-6">
       {/* 🎁 PROMO CARD */}
       <div className="bg-white rounded-[14.5px] border border-[#E6E6E6] shadow-[0px_0px_17.7px_-8px_rgba(0,0,0,0.16)] px-4 py-3 flex items-center justify-between overflow-hidden">
         <div className="max-w-[65%]">
@@ -42,32 +42,30 @@ export default function Utility() {
         <span>🌿</span>
       </div>
 
-      {/* 🛡️ INFO CARDS */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* 🔹 Security */}
-        <div className="relative h-[180px] rounded-[20px] overflow-hidden">
-          <Image
-            src="/images/security.png"
-            alt="security"
-            fill
-            className="object-cover"
-          />
+      {/* 🛡️ INFO CARDS (FIXED LAYOUT) */}
+      <div className="-mx-2">
+        <div className="grid grid-cols-2 gap-3 px-2">
+          {/* 🔹 Security */}
+          <div className="relative h-[200px] rounded-[20px] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.15)]">
+            <Image
+              src="/images/security.png"
+              alt="security"
+              fill
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
+          </div>
 
-          {/* Only gradient (NO TEXT, NO BADGE) */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
-        </div>
-
-        {/* 🔹 Management */}
-        <div className="relative h-[180px] rounded-[20px] overflow-hidden">
-          <Image
-            src="/images/management.png"
-            alt="management"
-            fill
-            className="object-cover"
-          />
-
-          {/* Only gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
+          {/* 🔹 Management */}
+          <div className="relative h-[200px] rounded-[20px] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.15)]">
+            <Image
+              src="/images/management.png"
+              alt="management"
+              fill
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
+          </div>
         </div>
       </div>
 

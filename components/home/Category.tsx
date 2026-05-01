@@ -33,7 +33,7 @@ export default function Category() {
             </div>
 
             {/* Label */}
-            <p className="text-[11px] mt-2 text-gray-600 font-medium tracking-wide">
+            <p className="text-[11px] mt-2 text-[#595C5D] font-inter font-medium tracking-wide">
               {item.name}
             </p>
           </div>

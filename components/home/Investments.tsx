@@ -19,10 +19,9 @@ function BondItem({
   return (
     <div className="relative bg-white rounded-[14px] border border-[#ECECEC] shadow-[0px_3.6px_5.4px_-0.9px_rgba(0,31,42,0.05)] px-4 py-3 flex justify-between items-center">
       {/* ✅ Badge */}
-      <span className="absolute top-2 right-2 text-[10px] bg-[#ECFCF2] text-green-600 px-2 py-[2px] rounded-[4px] font-medium whitespace-nowrap">
+      <span className="absolute top-0 right-4 -translate-y-1/2 bg-[#ECFCF2] text-green-600 text-[10px] px-3 py-[3px] rounded-[6px] font-medium whitespace-nowrap shadow-sm">
         Sell Anytime
       </span>
-
       {/* Left */}
       <div className="flex items-center gap-3">
         <div className="w-[40px] h-[40px] relative">
