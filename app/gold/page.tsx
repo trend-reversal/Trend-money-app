@@ -128,49 +128,41 @@ export default function GoldPage() {
 
       {/* 🔹 Exclusive Benefit */}
       <div className="px-4 mt-6">
-        <div className="bg-white rounded-2xl p-4 shadow-sm">
-          <p className="text-[#D99100] font-semibold text-sm">
-            Convert your gold into jewellery
-          </p>
-
-          <div className="flex gap-4 mt-3">
-            <Image
-              src="/images/caratlane.png"
-              alt="brand"
-              width={80}
-              height={30}
-            />
-            <Image
-              src="/images/tanishq.png"
-              alt="brand"
-              width={80}
-              height={30}
-            />
-          </div>
-
-          <Image
-            src="/images/jewellery.png"
-            alt="jewellery"
-            width={300}
-            height={120}
-            className="mt-3 rounded-lg"
-          />
-        </div>
+        <Image
+          src="/images/gold/jewellery.png"
+          alt="jewellery"
+          width={400}
+          height={160}
+          className="w-full h-[160px] object-cover rounded-2xl"
+        />
       </div>
 
-      {/* 🔹 Market Performance */}
       <div className="px-4 mt-6">
-        <div className="bg-white rounded-2xl p-4 shadow-sm">
-          <p className="text-sm text-gray-500 mb-3">Market Performance</p>
+        <div
+          className="
+      bg-white
+      rounded-[8px]
+      border border-[#F7F7FA]
+      shadow-[0px_0px_25px_rgba(13,13,13,0.04)]
+      p-4
+    "
+        >
+          {/* Top Text */}
+          <p className="text-[11px] text-gray-400 leading-tight">
+            The best to purchase gold was yesterday <br />
+            but second best is{" "}
+            <span className="text-[#D99100] font-semibold">NOW!</span>
+          </p>
 
-          <div className="flex gap-2 mb-4">
+          {/* Tabs */}
+          <div className="flex gap-2 mt-4">
             {["6M", "1Y", "3Y", "5Y"].map((tab) => (
               <button
                 key={tab}
-                className={`px-3 py-1 rounded-lg text-sm ${
+                className={`px-4 py-1.5 rounded-md text-[12px] border ${
                   tab === "3Y"
-                    ? "bg-[#D99100] text-white"
-                    : "bg-gray-100 text-gray-600"
+                    ? "bg-[#D4AF37] text-white border-[#D4AF37]"
+                    : "bg-white text-gray-500 border-[#E5E7EB]"
                 }`}
               >
                 {tab}
@@ -178,8 +170,37 @@ export default function GoldPage() {
             ))}
           </div>
 
-          <div className="h-40 bg-[#F7F7FA] rounded-xl flex items-center justify-center text-gray-400 text-sm">
-            Graph Placeholder
+          {/* Chart Area */}
+          <div className="relative mt-6 h-[240px] bg-[#F9F9FB] rounded-lg overflow-hidden">
+            {/* Fake Graph Line */}
+            <div className="absolute bottom-0 left-0 w-full h-full">
+              <svg viewBox="0 0 300 200" className="w-full h-full">
+                <path
+                  d="M0 180 C50 170, 80 150, 110 130 C140 110, 170 120, 200 90 C230 60, 260 80, 300 70"
+                  fill="none"
+                  stroke="#D4AF37"
+                  strokeWidth="2"
+                />
+
+                {/* Area fill */}
+                <path
+                  d="M0 180 C50 170, 80 150, 110 130 C140 110, 170 120, 200 90 C230 60, 260 80, 300 70 L300 200 L0 200 Z"
+                  fill="#D4AF37"
+                  opacity="0.15"
+                />
+              </svg>
+            </div>
+
+            {/* Highlight Dot */}
+            <div className="absolute right-[60px] top-[90px] w-3 h-3 bg-[#D4AF37] rounded-full" />
+
+            {/* Tooltip */}
+            <div className="absolute right-[70px] top-[40px] bg-white px-3 py-2 rounded-md shadow text-center border border-[#F3F3F3]">
+              <p className="text-[10px] text-gray-400">MAY'25</p>
+              <p className="text-[13px] font-semibold text-[#D4AF37]">
+                ₹1,305.49/g
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -202,21 +223,39 @@ export default function GoldPage() {
       </div>
 
       {/* 🔹 Certificates */}
+      {/* 🔹 Authenticity Certificate Slider */}
       <div className="px-4 mt-6">
-        <div className="bg-white rounded-2xl p-4 text-center shadow-sm">
-          <p className="text-sm text-gray-500">In Partnership with</p>
+        <h3 className="text-sm text-gray-400 mb-3">Authenticity Certificate</h3>
 
-          <Image
-            src="/images/safegold.png"
-            alt="safegold"
-            width={120}
-            height={40}
-            className="mx-auto mt-2"
-          />
-
-          <button className="text-[#D99100] text-sm mt-2 underline">
-            View Certificate
-          </button>
+        <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory">
+          {[
+            "/images/gold/safegold.png",
+            "/images/gold/vistra.png",
+            "/images/gold/brinks.png",
+          ].map((src, i) => (
+            <div
+              key={i}
+              className="
+          min-w-[260px]
+          h-[300px]
+          bg-[#F9F9FB]
+          rounded-[16px]
+          border border-[#EBEBEB]
+          shadow-[0px_4px_10px_rgba(0,0,0,0.08)]
+          flex items-center justify-center
+          snap-start
+          p-4
+        "
+            >
+              <Image
+                src={src}
+                alt="certificate"
+                width={300}
+                height={300}
+                className="w-full h-full object-contain rounded-[12px]"
+              />
+            </div>
+          ))}
         </div>
       </div>
 
