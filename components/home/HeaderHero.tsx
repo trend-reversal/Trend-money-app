@@ -118,8 +118,8 @@ export default function HeaderHero() {
                   backgroundColor: "#EAF9F4",
                   border:
                     position === "center"
-                      ? "2px solid #A8E8D4"
-                      : "1.5px solid #C4EEE0",
+                      ? "2px solid #FFFFFF"
+                      : "1.5px solid #FFFFFF",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
