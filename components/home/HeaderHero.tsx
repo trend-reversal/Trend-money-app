@@ -82,22 +82,19 @@ export default function HeaderHero() {
         </div>
       </div>
 
-      {/* 🔥 Premium Carousel */}
+      {/* 🔥 Loop Carousel (Always 3 Cards) */}
       <div
         className="relative flex items-center justify-center overflow-hidden h-[220px]"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {assets.map((item, i) => {
-          const position =
-            i === index
-              ? "center"
-              : i === (index - 1 + assets.length) % assets.length
-                ? "left"
-                : i === (index + 1) % assets.length
-                  ? "right"
-                  : "hidden";
+        {[
+          (index - 1 + assets.length) % assets.length, // left
+          index, // center
+          (index + 1) % assets.length, // right
+        ].map((i, pos) => {
+          const position = pos === 1 ? "center" : pos === 0 ? "left" : "right";
 
           return (
             <div
@@ -109,12 +106,9 @@ export default function HeaderHero() {
                     ? "translateX(0) scale(1)"
                     : position === "left"
                       ? "translateX(-160px) scale(0.8)"
-                      : position === "right"
-                        ? "translateX(160px) scale(0.8)"
-                        : "scale(0)",
+                      : "translateX(160px) scale(0.8)",
 
                 zIndex: position === "center" ? 3 : 2,
-                opacity: position === "hidden" ? 0 : 1,
               }}
             >
               <div
@@ -138,8 +132,8 @@ export default function HeaderHero() {
                 }}
               >
                 <Image
-                  src={item.img}
-                  alt={item.name}
+                  src={assets[i].img}
+                  alt={assets[i].name}
                   width={160}
                   height={160}
                   className="object-contain"
