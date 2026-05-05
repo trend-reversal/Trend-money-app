@@ -206,19 +206,52 @@ export default function GoldPage() {
       </div>
 
       {/* 🔹 Instant SIP */}
+      {/* 🔹 Instant SIP (Matched with chart card) */}
       <div className="px-4 mt-6">
-        <div className="bg-white rounded-2xl p-4 shadow-sm">
-          <p className="text-xs text-gray-500">
-            START SMALL, GROW BIG EVERY MONTH
-          </p>
+        <div
+          className="
+      bg-[#F9F9FB]
+      rounded-lg
+      border border-[#F3F3F3]
+      shadow
+      p-4
+      flex justify-between items-start
+    "
+        >
+          {/* LEFT */}
+          <div>
+            <h3 className="text-[14px] font-semibold text-black">
+              Instant SIP
+            </h3>
 
-          <h2 className="text-3xl font-bold mt-1">
-            ₹2000 <span className="text-sm text-gray-500">/ MONTH</span>
-          </h2>
+            <p className="text-[10px] text-gray-400 mt-1 leading-tight">
+              START SMALL, GROW BIG EVERY MONTH.
+            </p>
 
-          <button className="mt-4 bg-[#0B5E4E] text-white w-full py-2 rounded-lg">
-            Instant SIP
-          </button>
+            <h2 className="text-[26px] font-bold mt-2 text-black">
+              ₹2000{" "}
+              <span className="text-[12px] text-gray-400 font-medium">
+                / MONTH
+              </span>
+            </h2>
+
+            <button className="mt-4 bg-[#00130C] text-white px-5 py-2 rounded-md text-[13px] font-medium">
+              Instant SIP
+            </button>
+          </div>
+
+          {/* RIGHT ICON */}
+          <div className="w-[38px] h-[38px] bg-[#EFE3C2] rounded-md flex items-center justify-center">
+            <svg
+              width="14"
+              height="26"
+              viewBox="0 0 14 26"
+              xmlns="http://www.w3.org/2000/svg"
+              className="rotate-180"
+            >
+              <path d="M8.5 0L1 14H6L4.5 26L13 10H8L8.5 0Z" fill="#775A19" />
+            </svg>
+          </div>
         </div>
       </div>
 
