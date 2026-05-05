@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { motion, useMotionValue, animate } from "framer-motion";
 
 export default function HeaderHero() {
   const assets = [
@@ -36,9 +37,8 @@ export default function HeaderHero() {
   ];
 
   const [index, setIndex] = useState(0);
-  const [trackX, setTrackX] = useState(0);
-  const [animating, setAnimating] = useState(false);
-  const [slidingDir, setSlidingDir] = useState<"next" | "prev" | null>(null);
+  const [displayIndex, setDisplayIndex] = useState(0); // for info section, updates after animation
+  const animating = useRef(false);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
 
@@ -47,35 +47,79 @@ export default function HeaderHero() {
   const GAP = 12;
   const STEP = CENTER_CARD / 2 + GAP + SIDE_CARD / 2; // 186px
 
+  // Each offset slot's center/side size — driven by a motion value per slot
+  // We use a single trackX motion value for the sliding
+  const trackX = useMotionValue(0);
+
+  // Per-slot animated sizes: offsets -2,-1,0,1,2
+  // slot 2 (center) = CENTER_CARD, others = SIDE_CARD
+  // We'll animate these with framer on slide
+  const slotSizes = useRef([
+    SIDE_CARD, // -2
+    SIDE_CARD, // -1
+    CENTER_CARD, // 0 (center)
+    SIDE_CARD, // +1
+    SIDE_CARD, // +2
+  ]);
+
+  // Motion values for each slot's width/height
+  const slot0W = useMotionValue(SIDE_CARD);
+  const slot1W = useMotionValue(SIDE_CARD);
+  const slot2W = useMotionValue(CENTER_CARD); // center
+  const slot3W = useMotionValue(SIDE_CARD);
+  const slot4W = useMotionValue(SIDE_CARD);
+  const slotWidths = [slot0W, slot1W, slot2W, slot3W, slot4W];
+
+  const EASING = [0.32, 0.72, 0, 1] as const;
+  const DURATION = 0.42;
+
   const slide = (dir: "next" | "prev") => {
-    if (animating) return;
-    setAnimating(true);
-    setSlidingDir(dir);
-    setTrackX(dir === "next" ? -STEP : STEP);
+    if (animating.current) return;
+    animating.current = true;
 
-    setTimeout(() => {
-      setIndex((prev) =>
-        dir === "next"
-          ? (prev + 1) % assets.length
-          : (prev - 1 + assets.length) % assets.length,
-      );
-      setTrackX(0);
-      setAnimating(false);
-      setSlidingDir(null);
-    }, 420);
-  };
+    // Slide track
+    animate(trackX, dir === "next" ? -STEP : STEP, {
+      duration: DURATION,
+      ease: EASING,
+      onComplete: () => {
+        // Snap: reset trackX instantly, update index
+        trackX.set(0);
+        setIndex((prev) =>
+          dir === "next"
+            ? (prev + 1) % assets.length
+            : (prev - 1 + assets.length) % assets.length,
+        );
+        setDisplayIndex((prev) =>
+          dir === "next"
+            ? (prev + 1) % assets.length
+            : (prev - 1 + assets.length) % assets.length,
+        );
+        animating.current = false;
+      },
+    });
 
-  // ✅ Slide ke dauran incoming card grow karo, outgoing shrink karo
-  const getCardSize = (offset: number) => {
-    if (animating && slidingDir === "next") {
-      if (offset === 1) return CENTER_CARD; // incoming → grow
-      if (offset === 0) return SIDE_CARD; // outgoing → shrink
-    }
-    if (animating && slidingDir === "prev") {
-      if (offset === -1) return CENTER_CARD; // incoming → grow
-      if (offset === 0) return SIDE_CARD; // outgoing → shrink
-    }
-    return offset === 0 ? CENTER_CARD : SIDE_CARD;
+    // Animate sizes: on "next", slot index 3 (offset +1) grows to center, slot 2 (offset 0) shrinks
+    // on "prev", slot index 1 (offset -1) grows to center, slot 2 (offset 0) shrinks
+    const growing = dir === "next" ? 3 : 1; // slot array index
+    const shrinking = 2; // center slot
+
+    animate(slotWidths[growing], CENTER_CARD, {
+      duration: DURATION,
+      ease: EASING,
+    });
+    animate(slotWidths[shrinking], SIDE_CARD, {
+      duration: DURATION,
+      ease: EASING,
+    });
+
+    // After snap, reset sizes back
+    setTimeout(
+      () => {
+        slotWidths[growing].set(SIDE_CARD);
+        slotWidths[shrinking].set(CENTER_CARD);
+      },
+      DURATION * 1000 + 10,
+    );
   };
 
   const handleTouchStart = (e: any) =>
@@ -130,34 +174,33 @@ export default function HeaderHero() {
         </div>
       </div>
 
-      {/* 🔥 Carousel */}
+      {/* Carousel */}
       <div
         className="relative overflow-hidden h-[220px]"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <div
-          className="absolute flex items-center top-1/2"
+        <motion.div
+          className="absolute flex items-center top-1/2 -translate-y-1/2"
           style={{
             gap: GAP,
             left: "50%",
-            transform: `translateX(calc(-50% + ${trackX}px)) translateY(-50%)`,
-            transition: animating ? "transform 420ms ease-in-out" : "none",
+            x: trackX,
+            translateX: "-50%",
           }}
         >
-          {[-2, -1, 0, 1, 2].map((offset) => {
+          {[-2, -1, 0, 1, 2].map((offset, slotIdx) => {
             const i = (index + offset + assets.length * 10) % assets.length;
-            const size = getCardSize(offset);
-            const imgSize = size === CENTER_CARD ? 168 : 124;
-            const padding = size === CENTER_CARD ? 16 : 12;
+            const w = slotWidths[slotIdx];
+            const isCenter = offset === 0;
 
             return (
-              <div
+              <motion.div
                 key={offset}
                 style={{
-                  width: size,
-                  height: size,
+                  width: w,
+                  height: w,
                   flexShrink: 0,
                   borderRadius: 16,
                   backgroundColor: "#FFFFFF",
@@ -165,42 +208,35 @@ export default function HeaderHero() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  padding,
-                  boxShadow:
-                    size === CENTER_CARD
-                      ? "0 8px 24px rgba(0,0,0,0.10)"
-                      : "0 4px 12px rgba(0,0,0,0.06)",
-                  // ✅ Track ke saath saath size bhi smoothly animate hoga
-                  transition:
-                    "width 420ms ease-in-out, height 420ms ease-in-out, padding 420ms ease-in-out, box-shadow 420ms ease-in-out",
+                  boxShadow: isCenter
+                    ? "0 8px 24px rgba(0,0,0,0.10)"
+                    : "0 4px 12px rgba(0,0,0,0.06)",
+                  overflow: "hidden",
                 }}
               >
                 <Image
                   src={assets[i].img}
                   alt={assets[i].name}
-                  width={imgSize}
-                  height={imgSize}
-                  className="object-contain"
-                  style={{
-                    transition:
-                      "width 420ms ease-in-out, height 420ms ease-in-out",
-                  }}
+                  width={CENTER_CARD}
+                  height={CENTER_CARD}
+                  className="object-contain w-full h-full p-2"
                 />
-              </div>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       </div>
 
       {/* Info */}
       <div className="mt-5 px-6 bg-white pt-5 pb-2 text-center">
         <h2 className="text-[18px] font-bold text-[#1C1B1B]">
-          {assets[index].name}
+          {assets[displayIndex].name}
         </h2>
         <p className="text-[13px] text-[#4D4D4D] mt-1">
-          Starting at {assets[index].starting} | {assets[index].label}{" "}
+          Starting at {assets[displayIndex].starting} |{" "}
+          {assets[displayIndex].label}{" "}
           <span className="text-[#16A34A] font-semibold">
-            {assets[index].value}
+            {assets[displayIndex].value}
           </span>
         </p>
         <button className="w-[135px] h-[41px] mt-4 bg-[#131314] text-white rounded-[6px] text-[14px] active:scale-[0.98] transition">

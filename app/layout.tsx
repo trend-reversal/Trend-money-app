@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cabin, Inter } from "next/font/google";
 import "./globals.css";
 
@@ -17,13 +17,14 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Trend Money",
   description: "Finance App",
+};
 
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
+// ✅ correct place
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -36,7 +37,6 @@ export default function RootLayout({
       lang="en"
       className={`${cabin.variable} ${inter.variable} h-full antialiased`}
     >
-      {/* 👇 Default font = Inter */}
       <body className="min-h-screen bg-[#F7F8FA] flex justify-center">
         <div className="w-full max-w-[420px] min-h-screen bg-white">
           {children}
