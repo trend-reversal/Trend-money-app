@@ -14,7 +14,7 @@ export default function Category() {
   ];
 
   return (
-    <section className="px-6 mt-38">
+    <section className="px-6 mt-50">
       <div className="grid grid-cols-4 gap-2 text-center">
         {items.map((item) => (
           <div
