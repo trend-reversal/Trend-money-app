@@ -13,7 +13,7 @@ export default function HeaderHero() {
 
   const [index, setIndex] = useState(0);
 
-  // ✅ Swipe states
+  // ✅ Swipe logic
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
 
@@ -34,25 +34,6 @@ export default function HeaderHero() {
       setIndex((prev) => (prev - 1 + assets.length) % assets.length);
     }
   };
-
-  // Badge style (same as your original)
-  const badgeStyle = (size: number, isMain = false) => ({
-    width: size,
-    height: size,
-    borderRadius: 20,
-    backgroundColor: "#EAF9F4",
-    border: isMain ? "2px solid #A8E8D4" : "1.5px solid #C4EEE0",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: isMain ? 16 : 12,
-    boxShadow: isMain
-      ? "0 8px 24px rgba(0,0,0,0.10)"
-      : "0 4px 12px rgba(0,0,0,0.06)",
-    flexShrink: 0,
-    cursor: "pointer",
-    overflow: "hidden",
-  });
 
   return (
     <section className="pt-14 pb-6 w-full h-[386px] -mt-[31px] bg-gradient-to-b from-[#7480FE] to-[#FFFFFF]">
@@ -101,57 +82,65 @@ export default function HeaderHero() {
         </div>
       </div>
 
-      {/* 🔥 FINAL LOOP CAROUSEL */}
+      {/* 🔥 Loop Carousel (Always 3 Cards) */}
       <div
-        className="flex items-center justify-center overflow-hidden gap-4"
+        className="relative flex items-center justify-center overflow-hidden h-[220px]"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {/* LEFT */}
-        <div
-          style={{ ...badgeStyle(148), marginLeft: -90 }}
-          onClick={() =>
-            setIndex((prev) => (prev - 1 + assets.length) % assets.length)
-          }
-        >
-          <Image
-            src={assets[(index - 1 + assets.length) % assets.length].img}
-            alt="prev"
-            width={124}
-            height={124}
-            className="w-full h-full object-contain"
-          />
-        </div>
+        {[
+          (index - 1 + assets.length) % assets.length, // left
+          index, // center
+          (index + 1) % assets.length, // right
+        ].map((i, pos) => {
+          const position = pos === 1 ? "center" : pos === 0 ? "left" : "right";
 
-        {/* CENTER */}
-        <div
-          style={badgeStyle(200, true)}
-          onClick={() => setIndex((prev) => (prev + 1) % assets.length)}
-        >
-          <Image
-            src={assets[index].img}
-            alt="main"
-            width={168}
-            height={168}
-            className="w-full h-full object-contain"
-            priority
-          />
-        </div>
-
-        {/* RIGHT */}
-        <div
-          style={{ ...badgeStyle(148), marginRight: -90 }}
-          onClick={() => setIndex((prev) => (prev + 1) % assets.length)}
-        >
-          <Image
-            src={assets[(index + 1) % assets.length].img}
-            alt="next"
-            width={124}
-            height={124}
-            className="w-full h-full object-contain"
-          />
-        </div>
+          return (
+            <div
+              key={i}
+              className="absolute transition-all duration-500 ease-in-out"
+              style={{
+                transform:
+                  position === "center"
+                    ? "translateX(0) scale(1)"
+                    : position === "left"
+                      ? "translateX(-172px) scale(0.8)"
+                      : "translateX(172px) scale(0.8)",
+                zIndex: position === "center" ? 3 : 2,
+              }}
+            >
+              <div
+                style={{
+                  width: position === "center" ? 200 : 148,
+                  height: position === "center" ? 200 : 148,
+                  borderRadius: 20,
+                  backgroundColor: "#EAF9F4",
+                  border:
+                    position === "center"
+                      ? "2px solid #A8E8D4"
+                      : "1.5px solid #C4EEE0",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: position === "center" ? 16 : 12,
+                  boxShadow:
+                    position === "center"
+                      ? "0 8px 24px rgba(0,0,0,0.10)"
+                      : "0 4px 12px rgba(0,0,0,0.06)",
+                }}
+              >
+                <Image
+                  src={assets[i].img}
+                  alt={assets[i].name}
+                  width={position === "center" ? 168 : 124}
+                  height={position === "center" ? 168 : 124}
+                  className="object-contain"
+                />
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Info */}
