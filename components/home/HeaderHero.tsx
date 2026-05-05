@@ -38,19 +38,19 @@ export default function HeaderHero() {
   const [index, setIndex] = useState(0);
   const [trackX, setTrackX] = useState(0);
   const [animating, setAnimating] = useState(false);
+  const [slidingDir, setSlidingDir] = useState<"next" | "prev" | null>(null);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
 
   const CENTER_CARD = 200;
   const SIDE_CARD = 148;
   const GAP = 12;
-
-  // center card ka aadha + gap + side card ka aadha = ek step
-  const STEP = CENTER_CARD / 2 + GAP + SIDE_CARD / 2; // 100 + 12 + 74 = 186px
+  const STEP = CENTER_CARD / 2 + GAP + SIDE_CARD / 2; // 186px
 
   const slide = (dir: "next" | "prev") => {
     if (animating) return;
     setAnimating(true);
+    setSlidingDir(dir);
     setTrackX(dir === "next" ? -STEP : STEP);
 
     setTimeout(() => {
@@ -61,7 +61,21 @@ export default function HeaderHero() {
       );
       setTrackX(0);
       setAnimating(false);
+      setSlidingDir(null);
     }, 420);
+  };
+
+  // ✅ Slide ke dauran incoming card grow karo, outgoing shrink karo
+  const getCardSize = (offset: number) => {
+    if (animating && slidingDir === "next") {
+      if (offset === 1) return CENTER_CARD; // incoming → grow
+      if (offset === 0) return SIDE_CARD; // outgoing → shrink
+    }
+    if (animating && slidingDir === "prev") {
+      if (offset === -1) return CENTER_CARD; // incoming → grow
+      if (offset === 0) return SIDE_CARD; // outgoing → shrink
+    }
+    return offset === 0 ? CENTER_CARD : SIDE_CARD;
   };
 
   const handleTouchStart = (e: any) =>
@@ -134,10 +148,9 @@ export default function HeaderHero() {
         >
           {[-2, -1, 0, 1, 2].map((offset) => {
             const i = (index + offset + assets.length * 10) % assets.length;
-            const isCenter = offset === 0;
-            const size = isCenter ? CENTER_CARD : SIDE_CARD;
-            const imgSize = isCenter ? 168 : 124;
-            const padding = isCenter ? 16 : 12;
+            const size = getCardSize(offset);
+            const imgSize = size === CENTER_CARD ? 168 : 124;
+            const padding = size === CENTER_CARD ? 16 : 12;
 
             return (
               <div
@@ -148,16 +161,18 @@ export default function HeaderHero() {
                   flexShrink: 0,
                   borderRadius: 16,
                   backgroundColor: "#FFFFFF",
-                  border: isCenter
-                    ? "1.5px solid #FFFFFF"
-                    : "1.5px solid #FFFFFF",
+                  border: "1.5px solid #FFFFFF",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   padding,
-                  boxShadow: isCenter
-                    ? "0 8px 24px rgba(0,0,0,0.10)"
-                    : "0 4px 12px rgba(0,0,0,0.06)",
+                  boxShadow:
+                    size === CENTER_CARD
+                      ? "0 8px 24px rgba(0,0,0,0.10)"
+                      : "0 4px 12px rgba(0,0,0,0.06)",
+                  // ✅ Track ke saath saath size bhi smoothly animate hoga
+                  transition:
+                    "width 420ms ease-in-out, height 420ms ease-in-out, padding 420ms ease-in-out, box-shadow 420ms ease-in-out",
                 }}
               >
                 <Image
@@ -166,6 +181,10 @@ export default function HeaderHero() {
                   width={imgSize}
                   height={imgSize}
                   className="object-contain"
+                  style={{
+                    transition:
+                      "width 420ms ease-in-out, height 420ms ease-in-out",
+                  }}
                 />
               </div>
             );
@@ -187,21 +206,6 @@ export default function HeaderHero() {
         <button className="w-[135px] h-[41px] mt-4 bg-[#131314] text-white rounded-[6px] text-[14px] active:scale-[0.98] transition">
           Invest Now
         </button>
-        {/* ✅ Dots Indicator */}
-        {/* <div className="flex items-center justify-center gap-[6px] mt-4">
-          {assets.map((_, i) => (
-            <div
-              key={i}
-              style={{
-                width: i === index ? 20 : 8,
-                height: 8,
-                borderRadius: 999,
-                backgroundColor: i === index ? "#131314" : "#D9D9D9",
-                transition: "all 420ms ease-in-out",
-              }}
-            />
-          ))}
-        </div> */}
       </div>
     </section>
   );

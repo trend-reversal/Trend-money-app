@@ -17,6 +17,13 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Trend Money",
   description: "Finance App",
+
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
 };
 
 export default function RootLayout({
