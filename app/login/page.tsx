@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+
 
 /* 🔥 Animated Heading */
 function AnimatedHeading() {
@@ -20,25 +21,44 @@ function AnimatedHeading() {
     </>,
   ];
 
+  // Append a clone of the first slide so we can always scroll right→left
+  const slides = [...texts, texts[0]];
+
   const [index, setIndex] = useState(0);
+  const [animated, setAnimated] = useState(true);
+  const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setIndex((prev) => (prev + 1) % texts.length);
+      setAnimated(true);
+      setIndex((prev) => prev + 1);
     }, 2500);
 
     return () => clearInterval(interval);
   }, []);
 
+  // When we land on the cloned first slide, silently jump back to the real one
+  useEffect(() => {
+    if (index === slides.length - 1) {
+      const timer = setTimeout(() => {
+        setAnimated(false); // disable transition
+        setIndex(0); // jump to real first slide instantly
+      }, 700); // wait for slide animation to finish
+      return () => clearTimeout(timer);
+    }
+  }, [index]);
+
   return (
     <div className="overflow-hidden w-full">
       <div
-        className="flex transition-transform duration-700 ease-in-out"
+        ref={trackRef}
+        className="flex"
         style={{
-          transform: `translate3d(-${index * 100}%,0,0)`,
+          transform: `translate3d(-${index * 100}%, 0, 0)`,
+          transition: animated ? "transform 700ms ease-in-out" : "none",
         }}
       >
-        {texts.map((text, i) => (
+        {slides.map((text, i) => (
           <div key={i} className="min-w-full">
             <h1 className="text-[34px] leading-[42px] font-medium text-[#1A1A2E]">
               {text}
