@@ -114,10 +114,16 @@ export default function GoldPage() {
             <button
               key={i}
               onClick={() => {
+                // ✅ Open new page for Weekly & Monthly
                 if (
-                  item.title === "Daily SIP" ||
+                  item.title === "Weekly SIP" ||
                   item.title === "Monthly SIP"
                 ) {
+                  router.push("/gold/invest");
+                }
+
+                // ✅ Show inline amount box for Daily SIP
+                if (item.title === "Daily SIP") {
                   setShowAmountBox(true);
                 }
               }}
