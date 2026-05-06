@@ -8,7 +8,7 @@ export default function GoldPage() {
   const router = useRouter();
 
   return (
-    <div className="bg-[#F7F7FA] min-h-screen pb-6">
+    <div className="bg-white min-h-screen pb-6">
       {/* 🔹 Header */}
       <div className="flex items-center justify-between px-6 pt-12 pb-4 bg-white">
         {/* Back Button */}
@@ -33,8 +33,26 @@ export default function GoldPage() {
         </button>
 
         {/* Right Side (Price instead of search) */}
-        <div className="bg-[#FFF3E0] px-3 py-1 rounded-full text-[12px] text-[#D99100] font-medium">
-          ₹10646.08/g
+        <div className="w-[111px] h-[32.46px] bg-[#FFF4DD] rounded-[18.85px] flex items-center px-2 gap-1.5">
+          {/* Wifi Icon */}
+          <Image
+            src="/images/wifi.svg"
+            alt="live"
+            width={14}
+            height={14}
+            className="object-contain"
+          />
+
+          {/* Text */}
+          <div className="leading-none">
+            <p className="text-[6px] text-[#111111] font-medium mb-[2px]">
+              Gold Live Price
+            </p>
+
+            <p className="text-[9px] font-semibold text-[#111111]">
+              ₹10646.08/g
+            </p>
+          </div>
         </div>
       </div>
 
@@ -92,13 +110,40 @@ export default function GoldPage() {
           ].map((item, i) => (
             <div
               key={i}
-              className="relative h-[105px] bg-white border border-[#F7F7FA] rounded-[10px] flex flex-col items-center justify-center"
+              className="
+          relative
+          w-full
+          h-[105px]
+          bg-white
+          border border-[#F7F7FA]
+          rounded-[10px]
+          shadow-[0px_4px_4px_rgba(0,0,0,0.04)]
+          flex flex-col items-center justify-center
+          overflow-hidden
+        "
             >
               {/* Recommended Tag */}
               {item.title === "Monthly SIP" && (
-                <span className="absolute top-2 right-2 text-[9px] bg-[#E6F9F0] text-[#12B76A] px-2 py-[2px] rounded-full">
+                <div
+                  className="
+              absolute
+              top-0
+              right-0
+              w-[76px]
+              h-[20px]
+              bg-[#16A34A]
+              text-white
+              text-[8px]
+              font-semibold
+              flex items-center justify-center
+              rounded-tl-[10px]
+              rounded-tr-[2.3px]
+              rounded-br-[2.3px]
+              rounded-bl-[10px]
+            "
+                >
                   RECOMMENDED
-                </span>
+                </div>
               )}
 
               {/* Icon */}
@@ -111,7 +156,7 @@ export default function GoldPage() {
               />
 
               {/* Text */}
-              <p className="text-[13px] mt-2 text-center leading-tight">
+              <p className="text-[13px] mt-2 text-center leading-tight text-[#1D1D1F] font-medium">
                 {item.title}
               </p>
             </div>
@@ -120,8 +165,8 @@ export default function GoldPage() {
       </div>
 
       {/* 🔹 CTA */}
-      <div className="px-4 mt-6">
-        <button className="w-full bg-black text-white py-3 rounded-xl font-medium">
+      <div className="mt-6 flex justify-center">
+        <button className="w-[330px] h-[51px] bg-[#111111] rounded-[8px] text-white text-[15px] font-medium flex items-center justify-center">
           Start Investing
         </button>
       </div>
@@ -137,6 +182,7 @@ export default function GoldPage() {
         />
       </div>
 
+      {/* 🔹 Gold Growth Card */}
       <div className="px-4 mt-6">
         <div
           className="
@@ -148,22 +194,32 @@ export default function GoldPage() {
     "
         >
           {/* Top Text */}
-          <p className="text-[11px] text-gray-400 leading-tight">
-            The best to purchase gold was yesterday <br />
+          <p className="text-[11px] leading-[22px] text-[#8E95A4]">
+            The best to purchase gold was yesterday
+            <br />
             but second best is{" "}
-            <span className="text-[#D99100] font-semibold">NOW!</span>
+            <span className="text-[#D4AF37] font-medium">NOW!</span>
           </p>
 
           {/* Tabs */}
-          <div className="flex gap-2 mt-4">
+          <div className="flex justify-between mt-5">
             {["6M", "1Y", "3Y", "5Y"].map((tab) => (
               <button
                 key={tab}
-                className={`px-4 py-1.5 rounded-md text-[12px] border ${
-                  tab === "3Y"
-                    ? "bg-[#D4AF37] text-white border-[#D4AF37]"
-                    : "bg-white text-gray-500 border-[#E5E7EB]"
-                }`}
+                className={`
+            w-[68px]
+            h-[48px]
+            rounded-[12px]
+            border
+            text-[18px]
+            font-medium
+            transition-all
+            ${
+              tab === "3Y"
+                ? "bg-[#D4AF37] border-[#D4AF37] text-white"
+                : "bg-white border-[#E5E7EB] text-[#222222]"
+            }
+          `}
               >
                 {tab}
               </button>
@@ -172,9 +228,10 @@ export default function GoldPage() {
 
           {/* Chart Area */}
           <div className="relative mt-6 h-[240px] bg-[#F9F9FB] rounded-lg overflow-hidden">
-            {/* Fake Graph Line */}
-            <div className="absolute bottom-0 left-0 w-full h-full">
+            {/* Graph */}
+            <div className="absolute inset-0">
               <svg viewBox="0 0 300 200" className="w-full h-full">
+                {/* Line */}
                 <path
                   d="M0 180 C50 170, 80 150, 110 130 C140 110, 170 120, 200 90 C230 60, 260 80, 300 70"
                   fill="none"
@@ -182,22 +239,23 @@ export default function GoldPage() {
                   strokeWidth="2"
                 />
 
-                {/* Area fill */}
+                {/* Fill */}
                 <path
                   d="M0 180 C50 170, 80 150, 110 130 C140 110, 170 120, 200 90 C230 60, 260 80, 300 70 L300 200 L0 200 Z"
                   fill="#D4AF37"
-                  opacity="0.15"
+                  opacity="0.12"
                 />
               </svg>
             </div>
 
             {/* Highlight Dot */}
-            <div className="absolute right-[60px] top-[90px] w-3 h-3 bg-[#D4AF37] rounded-full" />
+            <div className="absolute right-[58px] top-[88px] w-[12px] h-[12px] rounded-full bg-[#D4AF37]" />
 
             {/* Tooltip */}
-            <div className="absolute right-[70px] top-[40px] bg-white px-3 py-2 rounded-md shadow text-center border border-[#F3F3F3]">
-              <p className="text-[10px] text-gray-400">MAY'25</p>
-              <p className="text-[13px] font-semibold text-[#D4AF37]">
+            <div className="absolute right-[68px] top-[36px] bg-white px-3 py-2 rounded-[10px] border border-[#F3F3F3] shadow-sm">
+              <p className="text-[10px] text-[#9CA3AF] text-center">MAY'25</p>
+
+              <p className="text-[13px] font-semibold text-[#D4AF37] text-center">
                 ₹1,305.49/g
               </p>
             </div>
@@ -235,7 +293,7 @@ export default function GoldPage() {
               </span>
             </h2>
 
-            <button className="mt-4 bg-[#00130C] text-white px-5 py-2 rounded-md text-[13px] font-medium">
+            <button className="mt-4 w-[184px] h-[43px] bg-[#00130C] rounded-[10px] text-white text-[13px] font-medium flex items-center justify-center">
               Instant SIP
             </button>
           </div>
@@ -258,9 +316,11 @@ export default function GoldPage() {
       {/* 🔹 Certificates */}
       {/* 🔹 Authenticity Certificate Slider */}
       <div className="px-4 mt-6">
-        <h3 className="text-sm text-gray-400 mb-3">Authenticity Certificate</h3>
+        <h3 className="text-sm text-[#B5B7B9] mb-3 font-inter  uppercase">
+          Authenticity Certificate
+        </h3>
 
-        <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory">
+        <div className="flex gap-4 overflow-x-scroll no-scrollbar snap-x snap-mandatory">
           {[
             "/images/gold/safegold.png",
             "/images/gold/vistra.png",
@@ -272,12 +332,11 @@ export default function GoldPage() {
           min-w-[260px]
           h-[300px]
           bg-[#F9F9FB]
-          rounded-[16px]
-          border border-[#EBEBEB]
-          shadow-[0px_4px_10px_rgba(0,0,0,0.08)]
+          
+          
           flex items-center justify-center
           snap-start
-          p-4
+          p-1
         "
             >
               <Image
@@ -293,28 +352,121 @@ export default function GoldPage() {
       </div>
 
       {/* 🔹 FAQ */}
+      {/* 🔹 FAQ */}
       <div className="px-4 mt-6">
-        <h3 className="text-sm text-gray-500 mb-3">FAQs</h3>
+        {/* Heading */}
+        <h3 className="text-[15px] font-inter font-semibold text-[#B5B7B9] mb-2">
+          FAQs
+        </h3>
 
-        {[
-          "Why should I upgrade?",
-          "What payment methods can I use?",
-          "How does billing work?",
-          "How can I cancel?",
-        ].map((q, i) => (
-          <div
-            key={i}
-            className="bg-white p-3 rounded-lg mb-2 flex justify-between items-center"
-          >
-            <p className="text-sm">{q}</p>
-            <span>+</span>
-          </div>
-        ))}
+        {/* FAQ Container */}
+        <div className="bg-transparent rounded-[14px] overflow-hidden">
+          {[
+            {
+              question: "Why should I upgrade?",
+              answer:
+                "Upgrading gives you access to premium features and better investment benefits.",
+            },
+            {
+              question: "What payment methods can I use?",
+              answer:
+                "You can pay using UPI, debit cards, credit cards, and net banking.",
+            },
+            {
+              question: "How does billing work?",
+              answer:
+                "Billing is processed automatically according to your selected investment plan.",
+            },
+            {
+              question: "How can I cancel?",
+              answer:
+                "You can cancel anytime directly from your profile settings.",
+            },
+          ].map((faq, i) => (
+            <details
+              key={i}
+              className="border-b border-dashed border-[#E5E5E5] py-5 group"
+            >
+              {/* Question */}
+              <summary className="list-none flex items-start justify-between cursor-pointer">
+                <p className="text-[16px] leading-[24px] text-[#111827] font-inter pr-4">
+                  {faq.question}
+                </p>
+
+                {/* Plus / Minus */}
+                <span className="text-[#9CA3AF] text-[22px] leading-none transition-all duration-200 group-open:rotate-45">
+                  +
+                </span>
+              </summary>
+
+              {/* Answer */}
+              <p className="mt-3 text-[14px] leading-[22px] text-[#6B7280] pr-6">
+                {faq.answer}
+              </p>
+            </details>
+          ))}
+        </div>
       </div>
 
       {/* 🔹 Footer */}
-      <div className="text-center text-xs text-gray-400 mt-6">
-        100% Safe & Secure • 24k Gold Savings • Withdraw Anytime
+      <div className="mt-10 px-6 pb-8">
+        {/* View More */}
+        <div className="flex justify-center">
+          <button className="text-[14px] text-[#C3C3C5] border-b border-[#C3C3C5] pb-[2px] tracking-wide">
+            VIEW MORE
+          </button>
+        </div>
+
+        {/* Features */}
+        <div className="flex justify-between items-center mt-10 text-center">
+          {/* Item 1 */}
+          <div className="flex-1">
+            <p className="text-[18px] leading-[34px] text-[#C3C3C5] font-normal">
+              100% Safe & <br /> Secure
+            </p>
+          </div>
+
+          {/* Divider */}
+          <div className="w-[1px] h-[92px] bg-[#E5E5E5]" />
+
+          {/* Item 2 */}
+          <div className="flex-1">
+            <p className="text-[18px] leading-[34px] text-[#C3C3C5] font-normal">
+              24k Gold <br /> Savings
+            </p>
+          </div>
+
+          {/* Divider */}
+          <div className="w-[1px] h-[92px] bg-[#E5E5E5]" />
+
+          {/* Item 3 */}
+          <div className="flex-1">
+            <p className="text-[18px] leading-[34px] text-[#C3C3C5] font-normal">
+              Withdraw <br /> Anytime
+            </p>
+          </div>
+        </div>
+
+        {/* Disclaimer */}
+        <div className="flex items-center justify-between mt-14">
+          <h3 className="text-[16px] font-medium text-black">Disclaimer</h3>
+
+          <svg
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M6 9L12 15L18 9"
+              stroke="black"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
       </div>
     </div>
   );
