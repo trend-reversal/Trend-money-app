@@ -381,36 +381,24 @@ export default function GoldPage() {
 
       {/* 🔹 Certificates */}
       {/* 🔹 Authenticity Certificate Slider */}
-      <div className="px-4 mt-6">
-        <h3 className="text-sm text-[#B5B7B9] mb-3 font-inter  uppercase">
+      <div className="mt-6">
+        <h3 className="text-sm text-[#B5B7B9] mb-3 font-inter uppercase px-4">
           Authenticity Certificate
         </h3>
 
-        <div className="flex gap-4 overflow-x-scroll no-scrollbar snap-x snap-mandatory">
+        <div className="flex gap-4 overflow-x-scroll no-scrollbar snap-x snap-mandatory px-4">
           {[
             "/images/gold/safegold.png",
             "/images/gold/vistra.png",
             "/images/gold/brinks.png",
           ].map((src, i) => (
-            <div
-              key={i}
-              className="
-          min-w-[260px]
-          h-[300px]
-          bg-[#F9F9FB]
-          
-          
-          flex items-center justify-center
-          snap-start
-          p-1
-        "
-            >
+            <div key={i} className="min-w-[260px] snap-start">
               <Image
                 src={src}
                 alt="certificate"
                 width={300}
                 height={300}
-                className="w-full h-full object-contain rounded-[12px]"
+                className="w-full h-auto object-contain rounded-[12px]"
               />
             </div>
           ))}

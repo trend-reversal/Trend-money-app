@@ -1,11 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function GoldPage() {
   const router = useRouter();
+
+  const [showAmountBox, setShowAmountBox] = useState(false);
 
   return (
     <div className="bg-white min-h-screen pb-6">
@@ -86,8 +88,9 @@ export default function GoldPage() {
 
       {/* 🔹 Quick Actions */}
       {/* 🔹 Quick Actions */}
+      {/* 🔹 Quick Actions */}
       <div className="px-4 mt-6">
-        <h3 className="text-sm text-gray-500 mb-3">Quick Actions</h3>
+        <h3 className="text-sm text-[#B5B7B9] uppercase mb-3">Quick Actions</h3>
 
         <div className="grid grid-cols-2 gap-3">
           {[
@@ -108,60 +111,90 @@ export default function GoldPage() {
               icon: "/images/gold/onetime.png",
             },
           ].map((item, i) => (
-            <div
+            <button
               key={i}
+              onClick={() => {
+                if (
+                  item.title === "Daily SIP" ||
+                  item.title === "Monthly SIP"
+                ) {
+                  setShowAmountBox(true);
+                }
+              }}
               className="
           relative
           w-full
-          h-[105px]
+          h-[92px]
           bg-white
-          border border-[#F7F7FA]
-          rounded-[10px]
-          shadow-[0px_4px_4px_rgba(0,0,0,0.04)]
+          border border-[#F1F1F1]
+          rounded-[14px]
+          shadow-sm
           flex flex-col items-center justify-center
-          overflow-hidden
+          active:scale-[0.98]
+          transition
         "
             >
-              {/* Recommended Tag */}
+              {/* Recommended */}
               {item.title === "Monthly SIP" && (
-                <div
-                  className="
-              absolute
-              top-0
-              right-0
-              w-[76px]
-              h-[20px]
-              bg-[#16A34A]
-              text-white
-              text-[8px]
-              font-semibold
-              flex items-center justify-center
-              rounded-tl-[10px]
-              rounded-tr-[2.3px]
-              rounded-br-[2.3px]
-              rounded-bl-[10px]
-            "
-                >
+                <div className="absolute top-0 right-0 bg-[#16A34A] text-white text-[8px] px-2 py-1 rounded-tr-[14px] rounded-bl-[10px] font-semibold">
                   RECOMMENDED
                 </div>
               )}
 
-              {/* Icon */}
-              <Image
+              <img
                 src={item.icon}
                 alt={item.title}
-                width={36}
-                height={36}
-                className="object-contain"
+                className="w-[34px] h-[34px] object-contain"
               />
 
-              {/* Text */}
-              <p className="text-[13px] mt-2 text-center leading-tight text-[#1D1D1F] font-medium">
+              <p className="text-[14px] mt-2 font-medium text-black">
                 {item.title}
               </p>
-            </div>
+            </button>
           ))}
         </div>
+
+        {/* ✅ Amount Box */}
+        {showAmountBox && (
+          <div className="mt-4">
+            {/* Input */}
+            <div className="w-full h-[74px] border border-[#E7E7E7] rounded-[16px] px-5 flex items-center bg-white">
+              <input
+                type="number"
+                placeholder="Enter Amount"
+                className="
+            w-full
+            bg-transparent
+            outline-none
+            text-[20px]
+            text-black
+            placeholder:text-[#C7C7C7]
+          "
+              />
+            </div>
+
+            {/* Amount Chips */}
+            <div className="flex gap-2 mt-3 overflow-x-auto no-scrollbar">
+              {["₹2,000", "₹5,000", "₹10,000", "₹15,000"].map((amount, i) => (
+                <button
+                  key={i}
+                  className="
+                px-4
+                h-[34px]
+                rounded-full
+                border border-[#E5E5E5]
+                bg-[#FAFAFA]
+                text-[15px]
+                text-[#7A7A7A]
+                whitespace-nowrap
+              "
+                >
+                  {amount}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 🔹 CTA */}
@@ -315,36 +348,24 @@ export default function GoldPage() {
 
       {/* 🔹 Certificates */}
       {/* 🔹 Authenticity Certificate Slider */}
-      <div className="px-4 mt-6">
-        <h3 className="text-sm text-[#B5B7B9] mb-3 font-inter  uppercase">
+      <div className="mt-6">
+        <h3 className="text-sm text-[#B5B7B9] mb-3 font-inter uppercase px-4">
           Authenticity Certificate
         </h3>
 
-        <div className="flex gap-4 overflow-x-scroll no-scrollbar snap-x snap-mandatory">
+        <div className="flex gap-4 overflow-x-scroll no-scrollbar snap-x snap-mandatory px-4">
           {[
             "/images/gold/safegold.png",
             "/images/gold/vistra.png",
             "/images/gold/brinks.png",
           ].map((src, i) => (
-            <div
-              key={i}
-              className="
-          min-w-[260px]
-          h-[300px]
-          bg-[#F9F9FB]
-          
-          
-          flex items-center justify-center
-          snap-start
-          p-1
-        "
-            >
+            <div key={i} className="min-w-[260px] snap-start">
               <Image
                 src={src}
                 alt="certificate"
                 width={300}
                 height={300}
-                className="w-full h-full object-contain rounded-[12px]"
+                className="w-full h-auto object-contain rounded-[12px]"
               />
             </div>
           ))}
