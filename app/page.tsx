@@ -28,7 +28,7 @@ export default function Splash() {
       {/* Center Content */}
       <div className="flex flex-col items-center justify-center flex-1">
         {/* Logo */}
-        <div className="w-[72px] h-[72px] rounded-[20px] overflow-hidden shadow-sm">
+        <div className="w-[72px] h-[72px] rounded-[20px] overflow-hidden">
           <Image
             src="/images/logo.png"
             alt="logo"
