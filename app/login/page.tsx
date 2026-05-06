@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
-
 /* 🔥 Animated Heading */
 function AnimatedHeading() {
   const texts = [
@@ -130,9 +129,29 @@ export default function LoginPage() {
                 {/* Back */}
                 <button
                   onClick={() => setShowOtp(false)}
-                  className="text-xl mb-6"
+                  className="mb-6 active:scale-90 transition"
                 >
-                  ←
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M19 12H5"
+                      stroke="#000"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M12 19L5 12L12 5"
+                      stroke="#000"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </button>
 
                 {/* Title */}
