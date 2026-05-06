@@ -57,7 +57,7 @@ export default function GoldPage() {
       </div>
 
       {/* 🔹 Hero Card */}
-      <div className="mx-4 mt-4 bg-white rounded-2xl p-4 flex items-center justify-between shadow-sm">
+      <div className="mx-4 mt-4 bg-[#FAF8F5] rounded-2xl p-4 flex items-center justify-between shadow-sm">
         <div>
           <p className="text-sm text-gray-600">Gold has soared nearly</p>
           <h1 className="text-3xl font-bold text-[#D99100]">50%</h1>
