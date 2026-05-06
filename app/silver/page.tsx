@@ -57,23 +57,89 @@ export default function GoldPage() {
       </div>
 
       {/* 🔹 Hero Card */}
-      <div className="mx-4 mt-4 bg-[#F7F4F3] rounded-2xl p-4 flex items-center justify-between shadow-sm">
-        <div>
-          <p className="text-sm text-gray-600">Gold has soared nearly</p>
-          <h1 className="text-3xl font-bold text-[#D99100]">50%</h1>
-          <p className="text-sm text-gray-500">this year!</p>
+      <div className="mx-4 mt-4 bg-[#F7F4F3] rounded-2xl px-[18px] py-[16px] flex items-center justify-between border border-[#F0F0F0] overflow-hidden">
+        {/* Left Content */}
+        <div className="flex-1">
+          {/* Top Text */}
+          <p
+            className="
+        font-serif
+        text-[15px]
+        leading-[15px]
+        text-black
+        font-normal
+        whitespace-nowrap
+      "
+          >
+            Silver has soared nearly
+          </p>
 
-          <p className="text-xs text-gray-400 mt-2">
-            Don’t miss this shine, <br /> start your journey today
+          {/* 171% */}
+          <div className="flex items-end mt-[4px] gap-[4px]">
+            <span
+              className="
+          font-serif
+          text-[38px]
+          leading-[38px]
+          text-[#69A1E1]
+          font-normal
+        "
+            >
+              171%
+            </span>
+
+            <span
+              className="
+          font-serif
+          text-[16px]
+          leading-[16px]
+          text-black
+          font-normal
+          mb-[4px]
+          whitespace-nowrap
+        "
+            >
+              this year!
+            </span>
+          </div>
+
+          {/* Line */}
+          <div className="w-[28px] h-[1px] bg-black mt-[8px] mb-[10px]" />
+
+          {/* Bottom Text */}
+          <p
+            className="
+        font-serif
+        text-[9px]
+        leading-[11px]
+        text-black
+        font-normal
+      "
+          >
+            Don’t miss the shine,
+          </p>
+
+          <p
+            className="
+        font-serif
+        text-[9px]
+        leading-[11px]
+        text-[#69A1E1]
+        font-normal
+        mt-[2px]
+      "
+          >
+            start your journey today
           </p>
         </div>
 
+        {/* Right Image */}
         <Image
           src="/images/silver/silver-fine.png"
           alt="silver"
-          width={140}
-          height={140}
-          className="object-contain"
+          width={160}
+          height={160}
+          className="object-contain -mr-4"
         />
       </div>
 
@@ -348,6 +414,42 @@ export default function GoldPage() {
               />
             </div>
           ))}
+        </div>
+      </div>
+      {/* 🔹 Silver Journey Benefits */}
+      <div className="px-4 mt-6">
+        {/* Top Heading */}
+        <div className="flex items-start justify-between mb-5">
+          <div>
+            <h3 className="text-[12px] font-medium text-[#B5B7B9] uppercase leading-[28px]">
+              Your Silver Journey Begins
+            </h3>
+
+            <p className="text-[10px] text-[#BCBCBC] leading-[22px]">
+              Simple, Secure, And Rewarding Investin
+              <br />
+              In Digital Silver.
+            </p>
+          </div>
+
+          <Image
+            src="/images/silver/silver-fine.png"
+            alt="silver bars"
+            width={120}
+            height={90}
+            className="object-contain -mt-2"
+          />
+        </div>
+
+        {/* Full Combined Image */}
+        <div className="rounded-[18px] overflow-hidden">
+          <Image
+            src="/images/silver/your-silver.png"
+            alt="silver benefits"
+            width={400}
+            height={900}
+            className="w-full h-auto object-contain"
+          />
         </div>
       </div>
 
