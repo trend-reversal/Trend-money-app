@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Cabin, Inter } from "next/font/google";
 import "./globals.css";
+import ReactQueryProvider from "@/providers/react-query-provider";
 
 const cabin = Cabin({
   subsets: ["latin"],
@@ -19,7 +20,6 @@ export const metadata: Metadata = {
   description: "Finance App",
 };
 
-// ✅ correct place
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -38,9 +38,11 @@ export default function RootLayout({
       className={`${cabin.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-screen bg-[#F7F8FA] flex justify-center">
-        <div className="w-full max-w-[420px] min-h-screen bg-white">
-          {children}
-        </div>
+        <ReactQueryProvider>
+          <div className="w-full max-w-[420px] min-h-screen bg-white">
+            {children}
+          </div>
+        </ReactQueryProvider>
       </body>
     </html>
   );

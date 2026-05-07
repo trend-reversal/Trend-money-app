@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useSendOtp } from "@/hooks/mutations/useSendOtp";
+import { useSignIn } from "@/hooks/mutations/useSignIn";
 
-/* 🔥 Animated Heading */
 function AnimatedHeading() {
   const texts = [
     <>
@@ -69,16 +69,93 @@ function AnimatedHeading() {
   );
 }
 
-/* 🔥 Main Page */
 export default function LoginPage() {
   const [phone, setPhone] = useState("");
   const [showOtp, setShowOtp] = useState(false);
   const [otp, setOtp] = useState(["", "", "", ""]);
-  const router = useRouter();
+  const [timer, setTimer] = useState(25);
+  const [isBlocked, setIsBlocked] = useState(false);
+
+  const { mutate: sendOtpMutation, isPending: isSendingOtp } =
+    useSendOtp();
+
+  const {
+    mutate: signInMutation,
+    isPending: isSigningIn,
+    error: signInError,
+  } = useSignIn();
+
+  const handleSendOtp = () => {
+    if (phone.length !== 10) return;
+
+    sendOtpMutation(
+      {
+        phone: `+91${phone}`,
+      },
+      {
+        onSuccess: () => {
+          setShowOtp(true);
+          setTimer(25);
+        },
+      }
+    );
+  };
+
+  const handleOtpChange = (
+    value: string,
+    index: number
+  ) => {
+    const sanitizedValue = value.replace(/\D/g, "");
+
+    const updatedOtp = [...otp];
+
+    updatedOtp[index] = sanitizedValue;
+
+    setOtp(updatedOtp);
+
+    if (sanitizedValue && index < 3) {
+      const nextInput = document.getElementById(
+        `otp-${index + 1}`
+      );
+
+      nextInput?.focus();
+    }
+
+    const finalOtp = updatedOtp.join("");
+
+    if (finalOtp.length === 4) {
+      signInMutation(
+        {
+          phone: `+91${phone}`,
+          otp: finalOtp,
+        },
+        {
+          onError: (error: any) => {
+            const cooldownMs =
+              error?.response?.data?.data?.cooldownMs;
+
+            if (cooldownMs) {
+              setIsBlocked(true);
+              setTimer(Math.floor(cooldownMs / 1000));
+            }
+          },
+        }
+      );
+    }
+  };
+
+  useEffect(() => {
+    if (!showOtp || timer <= 0) return;
+
+    const interval = setInterval(() => {
+      setTimer((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [showOtp, timer]);
 
   return (
     <div className="h-[100dvh] w-full max-w-[430px] mx-auto bg-white flex flex-col">
-      {/* 🔵 Top Gradient */}
       <div
         className="w-full h-[373px] px-6 flex justify-center items-start pt-[80px]"
         style={{
@@ -94,12 +171,10 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* ⚪ Bottom */}
       <div className="flex-1 px-6 flex flex-col justify-between pb-6">
         <div>
           {!showOtp ? (
             <>
-              {/* 🔹 LOGIN */}
               <AnimatedHeading />
 
               <div className="mt-8">
@@ -114,16 +189,14 @@ export default function LoginPage() {
                     }
                     inputMode="numeric"
                     placeholder="Enter Phone Number"
-                    className={`flex-1 pl-3 outline-none ${
-                      phone ? "text-black" : "text-gray-400"
-                    }`}
+                    className={`flex-1 pl-3 outline-none ${phone ? "text-black" : "text-gray-400"
+                      }`}
                   />
                 </div>
               </div>
             </>
           ) : (
             <>
-              {/* 🔥 OTP SCREEN */}
 
               <div className="pt-2">
                 {/* Back */}
@@ -175,50 +248,66 @@ export default function LoginPage() {
                       maxLength={1}
                       type="tel"
                       autoFocus={i === 0}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, "");
-                        if (!value) return;
-
-                        const newOtp = [...otp];
-                        newOtp[i] = value;
-                        setOtp(newOtp);
-
-                        const next = document.getElementById(`otp-${i + 1}`);
-                        next?.focus();
-
-                        if (newOtp.join("").length === 4) {
-                          router.push("/home");
-                        }
-                      }}
+                      onChange={(e) =>
+                        handleOtpChange(e.target.value, i)
+                      }
                       className="w-[60px] h-[60px] text-center text-xl border border-[#7480FE] rounded-[12px]
                       focus:outline-none focus:ring-2 focus:ring-[#7480FE]"
                     />
                   ))}
                 </div>
 
+                {signInError && (
+                  <p className="text-red-500 text-sm mt-3">
+                    {
+                      // @ts-ignore
+                      signInError?.response?.data?.message ||
+                      "Invalid OTP"
+                    }
+                  </p>
+                )}
+
                 {/* Resend */}
-                <p className="text-xs text-gray-400 mt-4">
-                  Resend OTP in <span className="text-[#6C7BFF]">00:25</span>
-                </p>
+                <div className="mt-4">
+                  {timer > 0 ? (
+                    <p className="text-xs text-gray-400">
+                      {isBlocked
+                        ? "Try again in "
+                        : "Resend OTP in "}
+                      <span className="text-[#6C7BFF]">
+                        {String(Math.floor(timer / 60)).padStart(2, "0")}:
+                        {String(timer % 60).padStart(2, "0")}
+                      </span>
+                    </p>
+                  ) : (
+                    <button
+                      onClick={handleSendOtp}
+                      className="text-sm text-[#6C7BFF] font-medium"
+                    >
+                      Resend OTP
+                    </button>
+                  )}
+                </div>
               </div>
             </>
           )}
         </div>
 
-        {/* 🔘 Button */}
         {!showOtp && (
           <button
-            onClick={() => {
-              if (phone.length > 0) setShowOtp(true);
-            }}
+            onClick={handleSendOtp}
+            disabled={phone.length !== 10 || isSendingOtp}
             className={`w-full h-[51px] rounded-[8px] text-[15px] font-semibold transition active:scale-[0.98]
-              ${
-                phone.length > 0
-                  ? "bg-black text-white"
-                  : "bg-[#E5E9E9] text-[#9CA3AF]"
+              ${phone.length > 0
+                ? "bg-black text-white"
+                : "bg-[#E5E9E9] text-[#9CA3AF]"
               }`}
           >
-            {phone.length > 0 ? "Continue" : "Get Started"}
+            {isSendingOtp
+              ? "Sending OTP..."
+              : phone.length > 0
+                ? "Continue"
+                : "Get Started"}
           </button>
         )}
       </div>

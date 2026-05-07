@@ -65,7 +65,6 @@ export default function HeaderHero() {
     }, 420);
   };
 
-  // ✅ Slide ke dauran incoming card grow karo, outgoing shrink karo
   const getCardSize = (offset: number) => {
     if (animating && slidingDir === "next") {
       if (offset === 1) return CENTER_CARD; // incoming → grow
@@ -86,12 +85,22 @@ export default function HeaderHero() {
     if (touchStart - touchEnd < -50) slide("prev");
   };
 
+  const user =
+    typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("user") || "{}")
+      : {};
+
+  const firstName = user?.firstName
+    ? user.firstName.charAt(0).toUpperCase() +
+    user.firstName.slice(1)
+    : "Investor";
+
   return (
     <section className="pt-24 pb-6 w-full h-[386px] -mt-[31px] bg-gradient-to-b from-[#7480FE] to-[#FFFFFF]">
       {/* Header */}
       <div className="flex justify-between items-center text-white px-6 mb-8">
         <div>
-          <h1 className="text-[24px] italic">Hi, Investor!</h1>
+          <h1 className="text-[24px] italic">Hi, {firstName}!</h1>
           <p className="text-[13px] mt-[2px]">
             Let's Build Your Financial Future
           </p>
@@ -130,7 +139,6 @@ export default function HeaderHero() {
         </div>
       </div>
 
-      {/* 🔥 Carousel */}
       <div
         className="relative overflow-hidden h-[220px]"
         onTouchStart={handleTouchStart}
@@ -170,7 +178,6 @@ export default function HeaderHero() {
                     size === CENTER_CARD
                       ? "0 8px 24px rgba(0,0,0,0.10)"
                       : "0 4px 12px rgba(0,0,0,0.06)",
-                  // ✅ Track ke saath saath size bhi smoothly animate hoga
                   transition:
                     "width 420ms ease-in-out, height 420ms ease-in-out, padding 420ms ease-in-out, box-shadow 420ms ease-in-out",
                 }}

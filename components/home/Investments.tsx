@@ -1,5 +1,7 @@
 "use client";
 
+import { useAssets } from "@/hooks/queries/useAssets";
+import { getBondRedirectUrl } from "@/lib/api/bonds";
 import Image from "next/image";
 
 /* 🔹 Bond Card */
@@ -9,28 +11,41 @@ function BondItem({
   tenure,
   rate,
   logo,
+  onClick,
 }: {
   name: string;
   min: string;
   tenure: string;
   rate: string;
   logo: string;
+  onClick: () => void;
 }) {
   return (
-    <div className="relative bg-white rounded-[14px] border border-[#ECECEC] shadow-[0px_3.6px_5.4px_-0.9px_rgba(0,31,42,0.05)] px-4 py-3 flex justify-between items-center">
+    <button
+      onClick={onClick}
+      className="relative w-full bg-white rounded-[14px] border border-[#ECECEC] shadow-[0px_3.6px_5.4px_-0.9px_rgba(0,31,42,0.05)] px-4 py-3 flex justify-between items-center active:scale-[0.98] transition"
+    >
       {/* ✅ Badge */}
       <span className="absolute top-0 right-4 -translate-y-1/2 bg-[#ECFCF2] text-green-600 text-[10px] px-3 py-[3px] rounded-[6px] font-medium whitespace-nowrap shadow-sm">
         Sell Anytime
       </span>
       {/* Left */}
-      <div className="flex items-center gap-3">
-        <div className="w-[40px] h-[40px] relative">
-          <Image src={logo} alt={name} fill className="object-contain" />
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div className="w-[40px] h-[40px] relative shrink-0">
+          <Image
+            src={logo}
+            alt={name}
+            fill
+            className="object-contain"
+          />
         </div>
 
-        <div>
-          <p className="text-[14px] font-medium text-black">{name}</p>
-          <p className="text-xs text-gray-500 mt-1">
+        <div className="flex-1 min-w-0 text-left">
+          <p className="text-[14px] font-medium text-black truncate">
+            {name}
+          </p>
+
+          <p className="text-xs text-gray-500 mt-1 truncate">
             Min. {min} • {tenure}
           </p>
         </div>
@@ -43,7 +58,7 @@ function BondItem({
         </p>
         <p className="text-[10px] text-gray-400">YTM</p>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -90,6 +105,51 @@ function FDItem({
 
 /* 🔥 Main Section */
 export default function Investments() {
+  const { data, isLoading } = useAssets();
+  const bonds =
+    data?.data?.Bonds?.list?.slice(0, 3) || [];
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const handleBondClick = async ({
+    page,
+    section,
+    assetId,
+  }: {
+    page: string;
+    section: string;
+    assetId: number;
+  }) => {
+    try {
+      const response =
+        await getBondRedirectUrl({
+          page,
+          section,
+          assetId,
+        });
+
+      const redirectUrl =
+        response?.data?.redirectUrl;
+
+      if (redirectUrl) {
+        window.open(
+          redirectUrl,
+          "_blank"
+        );
+      }
+    } catch (error) {
+      console.error(
+        "Failed to fetch redirect URL",
+        error
+      );
+    }
+  };
+
   return (
     <section className="px-6 mt-6 space-y-6">
       {/* 🔹 Top Bonds */}
@@ -103,29 +163,34 @@ export default function Investments() {
         </h3>
 
         <div className="space-y-3">
-          <BondItem
-            name="Best Capital"
-            min="₹9,918"
-            tenure="35 Months"
-            rate="13.65%"
-            logo="/images/best-capital.png"
-          />
-
-          <BondItem
-            name="Unifinz Capital"
-            min="₹49,987"
-            tenure="14 Months"
-            rate="13.50%"
-            logo="/images/unifize.png"
-          />
-
-          <BondItem
-            name="Aakara Capitals"
-            min="₹99,519"
-            tenure="14 Months"
-            rate="13.25%"
-            logo="/images/akara.png"
-          />
+          {isLoading ? (
+            <p className="text-sm text-gray-400">
+              Loading bonds...
+            </p>
+          ) : (
+            bonds.map((bond: any) => (
+              <BondItem
+                key={bond.id}
+                name={bond.description}
+                min={formatCurrency(
+                  bond.investmentAmount
+                )}
+                tenure={`${bond.timeToMaturity} Months`}
+                rate={`${bond.preTaxYield}%`}
+                logo={
+                  bond.logo ||
+                  "/images/best-capital.png"
+                }
+                onClick={() =>
+                  handleBondClick({
+                    page: "asset-detail",
+                    section: "bonds",
+                    assetId: bond.assetID,
+                  })
+                }
+              />
+            ))
+          )}
         </div>
       </div>
 
