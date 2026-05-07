@@ -3,15 +3,56 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useCreatePayment } from "@/hooks/mutations/useCreatePayment";
 
 export default function GoldPage() {
   const router = useRouter();
 
   const [showAmountBox, setShowAmountBox] = useState(false);
+  const [amount, setAmount] = useState("");
+
+  const {
+    mutate: createPaymentMutation,
+    isPending: isCreatingPayment,
+  } = useCreatePayment();
+
+  const handleStartInvestment = () => {
+    if (!amount) return;
+
+    createPaymentMutation(
+      {
+        amount: Number(amount),
+        safegold_tx_id: 2006745356,
+        productType: "GOLD",
+        deviceName: "mobile",
+      },
+      {
+        onSuccess: (response) => {
+          const checkoutUrl =
+            response?.checkout_url;
+
+          if (!checkoutUrl) return;
+
+          if (
+            typeof window !== "undefined" &&
+            window.ReactNativeWebView
+          ) {
+            window.ReactNativeWebView.postMessage(
+              JSON.stringify({
+                type: "OPEN_PAYMENT_PAGE",
+                url: checkoutUrl,
+              })
+            );
+          } else {
+            window.location.href = checkoutUrl;
+          }
+        },
+      }
+    );
+  };
 
   return (
     <div className="bg-white min-h-screen pb-6">
-      {/* 🔹 Header */}
       <div className="flex items-center justify-between px-6 pt-12 pb-4 bg-white">
         {/* Back Button */}
         <button
@@ -79,16 +120,12 @@ export default function GoldPage() {
         />
       </div>
 
-      {/* 🔹 Dots */}
       <div className="flex justify-center gap-1 mt-2">
         <div className="w-2 h-2 bg-gray-300 rounded-full" />
         <div className="w-2 h-2 bg-gray-300 rounded-full" />
         <div className="w-2 h-2 bg-gray-400 rounded-full" />
       </div>
 
-      {/* 🔹 Quick Actions */}
-      {/* 🔹 Quick Actions */}
-      {/* 🔹 Quick Actions */}
       <div className="px-4 mt-6">
         <h3 className="text-sm text-[#B5B7B9] uppercase mb-3">Quick Actions</h3>
 
@@ -114,7 +151,6 @@ export default function GoldPage() {
             <button
               key={i}
               onClick={() => {
-                // ✅ Open new page for Weekly & Monthly
                 if (
                   item.title === "Weekly SIP" ||
                   item.title === "Monthly SIP"
@@ -122,7 +158,6 @@ export default function GoldPage() {
                   router.push("/gold/invest");
                 }
 
-                // ✅ Show inline amount box for Daily SIP
                 if (item.title === "Daily SIP") {
                   setShowAmountBox(true);
                 }
@@ -160,13 +195,16 @@ export default function GoldPage() {
           ))}
         </div>
 
-        {/* ✅ Amount Box */}
         {showAmountBox && (
           <div className="mt-4">
             {/* Input */}
             <div className="w-full h-[74px] border border-[#E7E7E7] rounded-[16px] px-5 flex items-center bg-white">
               <input
                 type="number"
+                value={amount}
+                onChange={(e) =>
+                  setAmount(e.target.value)
+                }
                 placeholder="Enter Amount"
                 className="
             w-full
@@ -181,21 +219,26 @@ export default function GoldPage() {
 
             {/* Amount Chips */}
             <div className="flex gap-2 mt-3 overflow-x-auto no-scrollbar">
-              {["₹2,000", "₹5,000", "₹10,000", "₹15,000"].map((amount, i) => (
+              {["₹2,000", "₹5,000", "₹10,000", "₹15,000"].map((item, i) => (
                 <button
                   key={i}
+                  onClick={() =>
+                    setAmount(
+                      item.replace(/[₹,]/g, "")
+                    )
+                  }
                   className="
-                px-4
-                h-[34px]
-                rounded-full
-                border border-[#E5E5E5]
-                bg-[#FAFAFA]
-                text-[15px]
-                text-[#7A7A7A]
-                whitespace-nowrap
-              "
+      px-4
+      h-[34px]
+      rounded-full
+      border border-[#E5E5E5]
+      bg-[#FAFAFA]
+      text-[15px]
+      text-[#7A7A7A]
+      whitespace-nowrap
+    "
                 >
-                  {amount}
+                  {item}
                 </button>
               ))}
             </div>
@@ -203,14 +246,19 @@ export default function GoldPage() {
         )}
       </div>
 
-      {/* 🔹 CTA */}
       <div className="mt-6 flex justify-center">
-        <button className="w-[330px] h-[51px] bg-[#111111] rounded-[8px] text-white text-[15px] font-medium flex items-center justify-center">
-          Start Investing
+        <button
+          onClick={handleStartInvestment}
+          disabled={
+            !amount || isCreatingPayment
+          }
+          className="w-[330px] h-[51px] bg-[#111111] rounded-[8px] text-white text-[15px] font-medium flex items-center justify-center">
+          {isCreatingPayment
+            ? "Processing..."
+            : "Start Investing"}
         </button>
       </div>
 
-      {/* 🔹 Exclusive Benefit */}
       <div className="px-4 mt-6">
         <Image
           src="/images/gold/jewellery.png"
@@ -221,7 +269,6 @@ export default function GoldPage() {
         />
       </div>
 
-      {/* 🔹 Gold Growth Card */}
       <div className="px-4 mt-6">
         <div
           className="
@@ -253,11 +300,10 @@ export default function GoldPage() {
             text-[18px]
             font-medium
             transition-all
-            ${
-              tab === "3Y"
-                ? "bg-[#D4AF37] border-[#D4AF37] text-white"
-                : "bg-white border-[#E5E7EB] text-[#222222]"
-            }
+            ${tab === "3Y"
+                    ? "bg-[#D4AF37] border-[#D4AF37] text-white"
+                    : "bg-white border-[#E5E7EB] text-[#222222]"
+                  }
           `}
               >
                 {tab}
@@ -302,8 +348,6 @@ export default function GoldPage() {
         </div>
       </div>
 
-      {/* 🔹 Instant SIP */}
-      {/* 🔹 Instant SIP (Matched with chart card) */}
       <div className="px-4 mt-6">
         <div
           className="
@@ -351,9 +395,6 @@ export default function GoldPage() {
           </div>
         </div>
       </div>
-
-      {/* 🔹 Certificates */}
-      {/* 🔹 Authenticity Certificate Slider */}
       <div className="mt-6">
         <h3 className="text-sm text-[#B5B7B9] mb-3 font-inter uppercase px-4">
           Authenticity Certificate
@@ -378,8 +419,6 @@ export default function GoldPage() {
         </div>
       </div>
 
-      {/* 🔹 FAQ */}
-      {/* 🔹 FAQ */}
       <div className="px-4 mt-6">
         {/* Heading */}
         <h3 className="text-[15px] font-inter font-semibold text-[#B5B7B9] mb-2">
@@ -435,7 +474,6 @@ export default function GoldPage() {
         </div>
       </div>
 
-      {/* 🔹 Footer */}
       <div className="mt-10 px-6 pb-8">
         {/* View More */}
         <div className="flex justify-center">
