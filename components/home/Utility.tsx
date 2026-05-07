@@ -37,33 +37,48 @@ export default function Utility() {
 
       {/* 🛡️ TRUST STRIP */}
       <div className="flex items-center justify-center gap-2 text-[#6C7BFF] font-semibold text-[12px] tracking-wide">
-        <span>🌿</span>
+        {/* Left Leaf */}
+        <Image
+          src="/images/lief-left.png"
+          alt="leaf-left"
+          width={14}
+          height={22}
+          className="object-contain"
+        />
+
         <span>SAFE. REGULATED. RELIABLE.</span>
-        <span>🌿</span>
+
+        {/* Right Leaf */}
+        <Image
+          src="/images/lief-right.png"
+          alt="leaf-right"
+          width={14}
+          height={22}
+          className="object-contain"
+        />
       </div>
 
-      {/* 🛡️ INFO CARDS (FIXED LAYOUT) */}
-      <div className="-mx-2 overflow-x-auto">
+      <div className="-mx-2 overflow-x-auto no-scrollbar">
         <div className="flex gap-4 px-2">
-          {/* 🔹 Security */}
-          <div className="relative w-[260px] h-[280px] rounded-[24px] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.25)] flex-shrink-0">
-            <Image
-              src="/images/security.png"
-              alt="security"
-              fill
-              className="object-cover"
-            />
-          </div>
-
-          {/* 🔹 Management */}
-          <div className="relative w-[260px] h-[280px] rounded-[24px] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.25)] flex-shrink-0">
-            <Image
-              src="/images/management.png"
-              alt="management"
-              fill
-              className="object-cover"
-            />
-          </div>
+          {[
+            "/images/security.png",
+            "/images/management.png",
+            "/images/fees.png",
+            "/images/trust.png",
+          ].map((src, i) => (
+            <div
+              key={i}
+              className="relative min-w-[215px] w-[215px] h-[233px] rounded-[14px] overflow-hidden  flex-shrink-0"
+            >
+              <Image
+                src={src}
+                alt={`card-${i}`}
+                fill
+                className="object-containobject-cover rounded-[14px]"
+                sizes="215px"
+              />
+            </div>
+          ))}
         </div>
       </div>
 

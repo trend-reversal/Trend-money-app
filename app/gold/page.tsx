@@ -11,7 +11,7 @@ export default function GoldPage() {
 
   return (
     <div className="bg-white min-h-screen pb-6">
-      {/* 🔹 Header */}
+      {/* Header */}
       <div className="flex items-center justify-between px-6 pt-12 pb-4 bg-white">
         {/* Back Button */}
         <button
@@ -58,37 +58,69 @@ export default function GoldPage() {
         </div>
       </div>
 
-      {/* 🔹 Hero Card */}
-      <div className="mx-4 mt-4 bg-[#FAF8F5] rounded-2xl p-4 flex items-center justify-between shadow-sm">
-        <div>
-          <p className="text-sm text-gray-600">Gold has soared nearly</p>
-          <h1 className="text-3xl font-bold text-[#D99100]">50%</h1>
-          <p className="text-sm text-gray-500">this year!</p>
-
-          <p className="text-xs text-gray-400 mt-2">
-            Don’t miss this shine, <br /> start your journey today
-          </p>
-        </div>
-
+      {/*  Hero Card */}
+      <div className="mx-4 mt-4 relative overflow-hidden rounded-[18px] bg-[#FAF8F5] border border-[#ECECEC]">
+        {/* Background Image */}
         <Image
-          src="/images/gold/gold-fine.png"
-          alt="gold"
-          width={140}
-          height={140}
-          className="object-contain"
+          src="/images/gold/gold.png"
+          alt="gold-bg"
+          fill
+          className="object-cover"
+          priority
         />
+
+        {/* Overlay Content */}
+        <div className="relative z-10 flex items-center justify-between px-[18px] py-[16px]">
+          {/* Left Content */}
+          <div className="flex-1">
+            {/* Top Text */}
+            <p className="font-serif text-[15px] leading-[16px] text-black whitespace-nowrap">
+              Gold has soared nearly
+            </p>
+
+            {/* 50% */}
+            <div className="flex items-end mt-[4px] gap-[4px]">
+              <span className="font-serif text-[38px] leading-[38px] text-[#FFFFFF]">
+                50%
+              </span>
+
+              <span className="font-serif text-[16px] leading-[16px] text-black mb-[4px] whitespace-nowrap">
+                this year!
+              </span>
+            </div>
+
+            {/* Divider */}
+            <div className="w-[28px] h-[1px] bg-black mt-[8px] mb-[10px]" />
+
+            {/* Bottom Text */}
+            <p className="font-serif text-[9px] leading-[11px] text-black">
+              Don’t miss the shine,
+            </p>
+
+            <p className="font-serif text-[9px] leading-[11px] text-[#1A1A1A] mt-[2px]">
+              start your journey today
+            </p>
+          </div>
+
+          {/* Right Gold Image */}
+          <Image
+            src="/images/gold/gold-fine.png"
+            alt="gold"
+            width={160}
+            height={160}
+            className="object-contain -mr-4 relative z-10"
+          />
+        </div>
       </div>
 
-      {/* 🔹 Dots */}
+      {/*  Dots */}
       <div className="flex justify-center gap-1 mt-2">
         <div className="w-2 h-2 bg-gray-300 rounded-full" />
         <div className="w-2 h-2 bg-gray-300 rounded-full" />
         <div className="w-2 h-2 bg-gray-400 rounded-full" />
       </div>
 
-      {/* 🔹 Quick Actions */}
-      {/* 🔹 Quick Actions */}
-      {/* 🔹 Quick Actions */}
+      {/*  Quick Actions */}
       <div className="px-4 mt-6">
         <h3 className="text-sm text-[#B5B7B9] uppercase mb-3">Quick Actions</h3>
 
@@ -160,7 +192,7 @@ export default function GoldPage() {
           ))}
         </div>
 
-        {/* ✅ Amount Box */}
+        {/*  Amount Box */}
         {showAmountBox && (
           <div className="mt-4">
             {/* Input */}
@@ -203,7 +235,7 @@ export default function GoldPage() {
         )}
       </div>
 
-      {/* 🔹 CTA */}
+      {/* CTA */}
       <div className="mt-6 flex justify-center">
         <button className="w-[330px] h-[51px] bg-[#111111] rounded-[8px] text-white text-[15px] font-medium flex items-center justify-center">
           Start Investing
@@ -221,7 +253,7 @@ export default function GoldPage() {
         />
       </div>
 
-      {/* 🔹 Gold Growth Card */}
+      {/*  Gold Growth Card */}
       <div className="px-4 mt-6">
         <div
           className="
@@ -302,8 +334,7 @@ export default function GoldPage() {
         </div>
       </div>
 
-      {/* 🔹 Instant SIP */}
-      {/* 🔹 Instant SIP (Matched with chart card) */}
+      {/*  Instant SIP (Matched with chart card) */}
       <div className="px-4 mt-6">
         <div
           className="
@@ -352,8 +383,7 @@ export default function GoldPage() {
         </div>
       </div>
 
-      {/* 🔹 Certificates */}
-      {/* 🔹 Authenticity Certificate Slider */}
+      {/*  Authenticity Certificate Slider */}
       <div className="mt-6">
         <h3 className="text-sm text-[#B5B7B9] mb-3 font-inter uppercase px-4">
           Authenticity Certificate
@@ -378,8 +408,7 @@ export default function GoldPage() {
         </div>
       </div>
 
-      {/* 🔹 FAQ */}
-      {/* 🔹 FAQ */}
+      {/*  FAQ */}
       <div className="px-4 mt-6">
         {/* Heading */}
         <h3 className="text-[15px] font-inter font-semibold text-[#B5B7B9] mb-2">
@@ -435,7 +464,7 @@ export default function GoldPage() {
         </div>
       </div>
 
-      {/* 🔹 Footer */}
+      {/*  Footer */}
       <div className="mt-10 px-6 pb-8">
         {/* View More */}
         <div className="flex justify-center">

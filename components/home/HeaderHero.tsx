@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function HeaderHero() {
   const assets = [
@@ -11,6 +12,7 @@ export default function HeaderHero() {
       starting: "₹10",
       label: "Returns",
       value: "25.0%*",
+      route: "/gold",
     },
     {
       name: "Silver",
@@ -18,6 +20,7 @@ export default function HeaderHero() {
       starting: "₹10",
       label: "Returns",
       value: "25.0%*",
+      route: "/silver",
     },
     {
       name: "Bond",
@@ -25,6 +28,7 @@ export default function HeaderHero() {
       starting: "₹1,000",
       label: "YTM upto",
       value: "12.5%*",
+      route: "/bonds",
     },
     {
       name: "FD",
@@ -32,15 +36,18 @@ export default function HeaderHero() {
       starting: "₹1,000",
       label: "Returns",
       value: "8.10%*",
+      route: "/fd",
     },
   ];
 
   const [index, setIndex] = useState(0);
+  const router = useRouter();
   const [trackX, setTrackX] = useState(0);
   const [animating, setAnimating] = useState(false);
   const [slidingDir, setSlidingDir] = useState<"next" | "prev" | null>(null);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
 
   const CENTER_CARD = 200;
   const SIDE_CARD = 148;
@@ -80,10 +87,23 @@ export default function HeaderHero() {
 
   const handleTouchStart = (e: any) =>
     setTouchStart(e.targetTouches[0].clientX);
-  const handleTouchMove = (e: any) => setTouchEnd(e.targetTouches[0].clientX);
+  const handleTouchMove = (e: any) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+
+    if (Math.abs(touchStart - e.targetTouches[0].clientX) > 10) {
+      setIsSwiping(true);
+    }
+  };
   const handleTouchEnd = () => {
-    if (touchStart - touchEnd > 50) slide("next");
-    if (touchStart - touchEnd < -50) slide("prev");
+    if (touchStart - touchEnd > 50) {
+      slide("next");
+    } else if (touchStart - touchEnd < -50) {
+      slide("prev");
+    }
+
+    setTimeout(() => {
+      setIsSwiping(false);
+    }, 100);
   };
 
   return (
@@ -155,6 +175,11 @@ export default function HeaderHero() {
             return (
               <div
                 key={offset}
+                onClick={() => {
+                  if (!isSwiping) {
+                    router.push(assets[i].route);
+                  }
+                }}
                 style={{
                   width: size,
                   height: size,
