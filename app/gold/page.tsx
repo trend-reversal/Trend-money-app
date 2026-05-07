@@ -99,25 +99,59 @@ export default function GoldPage() {
         </div>
       </div>
 
-      {/* 🔹 Hero Card */}
-      <div className="mx-4 mt-4 bg-[#FAF8F5] rounded-2xl p-4 flex items-center justify-between shadow-sm">
-        <div>
-          <p className="text-sm text-gray-600">Gold has soared nearly</p>
-          <h1 className="text-3xl font-bold text-[#D99100]">50%</h1>
-          <p className="text-sm text-gray-500">this year!</p>
-
-          <p className="text-xs text-gray-400 mt-2">
-            Don’t miss this shine, <br /> start your journey today
-          </p>
-        </div>
-
+      {/*  Hero Card */}
+      <div className="mx-4 mt-4 relative overflow-hidden rounded-[18px] bg-[#FAF8F5] border border-[#ECECEC]">
+        {/* Background Image */}
         <Image
-          src="/images/gold/gold-fine.png"
-          alt="gold"
-          width={140}
-          height={140}
-          className="object-contain"
+          src="/images/gold/gold.png"
+          alt="gold-bg"
+          fill
+          className="object-cover"
+          priority
         />
+
+        {/* Overlay Content */}
+        <div className="relative z-10 flex items-center justify-between px-[18px] py-[16px]">
+          {/* Left Content */}
+          <div className="flex-1">
+            {/* Top Text */}
+            <p className="font-serif text-[15px] leading-[16px] text-black whitespace-nowrap">
+              Gold has soared nearly
+            </p>
+
+            {/* 50% */}
+            <div className="flex items-end mt-[4px] gap-[4px]">
+              <span className="font-serif text-[38px] leading-[38px] text-[#FFFFFF]">
+                50%
+              </span>
+
+              <span className="font-serif text-[16px] leading-[16px] text-black mb-[4px] whitespace-nowrap">
+                this year!
+              </span>
+            </div>
+
+            {/* Divider */}
+            <div className="w-[28px] h-[1px] bg-black mt-[8px] mb-[10px]" />
+
+            {/* Bottom Text */}
+            <p className="font-serif text-[9px] leading-[11px] text-black">
+              Don’t miss the shine,
+            </p>
+
+            <p className="font-serif text-[9px] leading-[11px] text-[#1A1A1A] mt-[2px]">
+              start your journey today
+            </p>
+          </div>
+
+          {/* Right Gold Image */}
+          <Image
+            src="/images/gold/gold-fine.png"
+            alt="gold"
+            width={160}
+            height={160}
+            className="object-contain -mr-4 relative z-10"
+          />
+        </div>
       </div>
 
       <div className="flex justify-center gap-1 mt-2">

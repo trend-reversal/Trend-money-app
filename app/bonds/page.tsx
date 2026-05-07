@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function BondsPage() {
   const router = useRouter();
+  const [active, setActive] = useState("All Bonds");
 
   const bonds = [
     {
@@ -125,15 +127,17 @@ export default function BondsPage() {
       </div>
 
       {/* 🔘 FILTERS */}
-      <div className="flex gap-2 px-6 mt-5 overflow-x-auto">
+      {/* 🔘 FILTERS */}
+      <div className="flex gap-3 px-4 mt-5 overflow-x-auto no-scrollbar whitespace-nowrap">
         {["All Bonds", "High Returns", "High Rated", "Short Term"].map(
           (f, i) => (
             <button
               key={i}
-              className={`px-4 py-2 rounded-[10px] text-[12px] border ${
-                i === 0
+              onClick={() => setActive(f)}
+              className={`h-[35px] px-[16px] rounded-[6.77px] border text-[12px] font-medium flex items-center justify-center whitespace-nowrap flex-shrink-0 transition-all duration-200 ${
+                active === f
                   ? "bg-[#EEF2FF] text-[#5B6FFF] border-[#5B6FFF]"
-                  : "bg-white border-[#E5E7EB] text-gray-600"
+                  : "bg-white border-[#E5E7EB] text-[#5F6368]"
               }`}
             >
               {f}
