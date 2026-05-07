@@ -35,7 +35,7 @@ export default function FDPage() {
 
   return (
     <section className="min-h-screen bg-[#F7F8FA]">
-      {/* 🔵 HEADER */}
+      {/*  HEADER */}
       <div className="flex items-center justify-between px-6 pt-12 pb-4 bg-white">
         <button
           onClick={() => router.back()}
@@ -62,7 +62,7 @@ export default function FDPage() {
         <div />
       </div>
 
-      {/* 🔥 HERO */}
+      {/*  HERO */}
       <div className="px-6 mt-4">
         <div className="relative w-full h-[160px] rounded-[16px] overflow-hidden shadow-sm">
           <Image
@@ -75,8 +75,8 @@ export default function FDPage() {
         </div>
       </div>
 
-      {/* 📦 LIST */}
-      {/* 📦 LIST */}
+    
+      {/*  LIST */}
       <div className="px-6 mt-5 space-y-4 pb-10">
         {fds.map((item, i) => (
           <div
@@ -264,67 +264,50 @@ export default function FDPage() {
           </button>
         </div>
       </div>
-      {/* 🛡️ TRUST TEXT */}
-      <div className="mt-6 flex items-center justify-center gap-2 text-[#6C7BFF] font-semibold text-[12px] tracking-wide">
-        <span>🌿</span>
+      {/* 🛡️ TRUST STRIP */}
+      <div className="flex items-center justify-center gap-2 text-[#6C7BFF] font-semibold text-[12px] tracking-wide">
+        {/* Left Leaf */}
+        <Image
+          src="/images/lief-left.png"
+          alt="leaf-left"
+          width={14}
+          height={22}
+          className="object-contain"
+        />
+
         <span>SAFE. REGULATED. RELIABLE.</span>
-        <span>🌿</span>
+
+        {/* Right Leaf */}
+        <Image
+          src="/images/lief-right.png"
+          alt="leaf-right"
+          width={14}
+          height={22}
+          className="object-contain"
+        />
       </div>
 
-      {/* 🔥 INFO CARDS */}
-      <div className="mt-4 px-6">
-        <div className="flex gap-4 overflow-x-auto pb-2">
-          {/* 🔹 Security Card */}
-          <div className="relative min-w-[260px] h-[170px] rounded-[18px] overflow-hidden shadow-md">
-            <Image
-              src="/images/security.png"
-              alt="security"
-              fill
-              className="object-cover"
-            />
-
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-
-            {/* Content */}
-            <div className="absolute top-3 left-3">
-              <span className="text-[10px] bg-white/20 text-white px-2 py-[3px] rounded-[6px] backdrop-blur">
-                Security
-              </span>
+      <div className="mt-6 -mx-2 overflow-x-auto no-scrollbar">
+        <div className="flex gap-4 px-2">
+          {[
+            "/images/security.png",
+            "/images/management.png",
+            "/images/fees.png",
+            "/images/trust.png",
+          ].map((src, i) => (
+            <div
+              key={i}
+              className="relative min-w-[215px] w-[215px] h-[233px] rounded-[14px] overflow-hidden  flex-shrink-0"
+            >
+              <Image
+                src={src}
+                alt={`card-${i}`}
+                fill
+                className="object-containobject-cover rounded-[14px]"
+                sizes="215px"
+              />
             </div>
-
-            <div className="absolute bottom-3 left-3 right-3">
-              <p className="text-white text-[14px] font-semibold leading-tight">
-                What makes your deposits secure?
-              </p>
-            </div>
-          </div>
-
-          {/* 🔹 Management Card */}
-          <div className="relative min-w-[260px] h-[170px] rounded-[18px] overflow-hidden shadow-md">
-            <Image
-              src="/images/management.png"
-              alt="management"
-              fill
-              className="object-cover"
-            />
-
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-
-            {/* Content */}
-            <div className="absolute top-3 left-3">
-              <span className="text-[10px] bg-white/20 text-white px-2 py-[3px] rounded-[6px] backdrop-blur">
-                Management
-              </span>
-            </div>
-
-            <div className="absolute bottom-3 left-3 right-3">
-              <p className="text-white text-[14px] font-semibold leading-tight">
-                Who manages your investments?
-              </p>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Cabin, Inter } from "next/font/google";
 import "./globals.css";
 import ReactQueryProvider from "@/providers/react-query-provider";
+import Script from "next/script";
 
 const cabin = Cabin({
   subsets: ["latin"],
@@ -38,6 +39,11 @@ export default function RootLayout({
       className={`${cabin.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-screen bg-[#F7F8FA] flex justify-center">
+
+        <Script
+          src="https://mercury.phonepe.com/web/bundle/checkout.js"
+          strategy="afterInteractive"
+        />
         <ReactQueryProvider>
           <div className="w-full max-w-[420px] min-h-screen bg-white">
             {children}

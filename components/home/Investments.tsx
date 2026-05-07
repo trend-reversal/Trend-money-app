@@ -137,20 +137,27 @@ export default function Investments() {
         response?.data?.redirectUrl;
 
       if (redirectUrl) {
-        if (
-          typeof window !== "undefined" &&
+        if (typeof window !== "undefined") {
           // @ts-ignore
-          window.ReactNativeWebView
-        ) {
-          // @ts-ignore
-          window.ReactNativeWebView.postMessage(
-            JSON.stringify({
-              type: "OPEN_BOND_URL",
-              url: redirectUrl,
-            })
+          const isReactNativeWebView =
+            !!window.ReactNativeWebView;
+
+          console.log(
+            "IS_RN_WEBVIEW",
+            isReactNativeWebView
           );
-        } else {
-          window.open(redirectUrl, "_blank");
+
+          if (isReactNativeWebView) {
+            // @ts-ignore
+            window.ReactNativeWebView.postMessage(
+              JSON.stringify({
+                type: "OPEN_BOND_URL",
+                url: redirectUrl,
+              })
+            );
+          } else {
+            window.open(redirectUrl, "_blank");
+          }
         }
       }
     } catch (error) {
