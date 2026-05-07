@@ -57,90 +57,58 @@ export default function GoldPage() {
       </div>
 
       {/* 🔹 Hero Card */}
-      <div className="mx-4 mt-4 bg-[#F7F4F3] rounded-2xl px-[18px] py-[16px] flex items-center justify-between border border-[#F0F0F0] overflow-hidden">
-        {/* Left Content */}
-        <div className="flex-1">
-          {/* Top Text */}
-          <p
-            className="
-        font-serif
-        text-[15px]
-        leading-[15px]
-        text-black
-        font-normal
-        whitespace-nowrap
-      "
-          >
-            Silver has soared nearly
-          </p>
+      <div className="mx-4 mt-4 relative overflow-hidden rounded-[18px] bg-[#F7F4F3] border border-[#ECECEC]">
+        {/* Background Image */}
+        <Image
+          src="/images/silver/silver.png"
+          alt="silver-bg"
+          fill
+          className="object-cover"
+          priority
+        />
 
-          {/* 171% */}
-          <div className="flex items-end mt-[4px] gap-[4px]">
-            <span
-              className="
-          font-serif
-          text-[38px]
-          leading-[38px]
-          text-[#69A1E1]
-          font-normal
-        "
-            >
-              171%
-            </span>
+        {/* Overlay Content */}
+        <div className="relative z-10 flex items-center justify-between px-[18px] py-[16px]">
+          {/* Left Content */}
+          <div className="flex-1">
+            {/* Top Text */}
+            <p className="font-serif text-[15px] leading-[16px] text-black whitespace-nowrap">
+              Silver has soared nearly
+            </p>
 
-            <span
-              className="
-          font-serif
-          text-[16px]
-          leading-[16px]
-          text-black
-          font-normal
-          mb-[4px]
-          whitespace-nowrap
-        "
-            >
-              this year!
-            </span>
+            {/* 171% */}
+            <div className="flex items-end mt-[4px] gap-[4px]">
+              <span className="font-serif text-[38px] leading-[38px] text-[#FFFFFF]">
+                171%
+              </span>
+
+              <span className="font-serif text-[16px] leading-[16px] text-black mb-[4px] whitespace-nowrap">
+                this year!
+              </span>
+            </div>
+
+            {/* Divider */}
+            <div className="w-[28px] h-[1px] bg-black mt-[8px] mb-[10px]" />
+
+            {/* Bottom Text */}
+            <p className="font-serif text-[9px] leading-[11px] text-black">
+              Don’t miss the shine,
+            </p>
+
+            <p className="font-serif text-[9px] leading-[11px] text-[#1A1A1A] mt-[2px]">
+              start your journey today
+            </p>
           </div>
 
-          {/* Line */}
-          <div className="w-[28px] h-[1px] bg-black mt-[8px] mb-[10px]" />
-
-          {/* Bottom Text */}
-          <p
-            className="
-        font-serif
-        text-[9px]
-        leading-[11px]
-        text-black
-        font-normal
-      "
-          >
-            Don’t miss the shine,
-          </p>
-
-          <p
-            className="
-        font-serif
-        text-[9px]
-        leading-[11px]
-        text-[#69A1E1]
-        font-normal
-        mt-[2px]
-      "
-          >
-            start your journey today
-          </p>
+          {/* Right Silver Image */}
+          <Image
+            src="/images/silver/silver-fine.png"
+            alt="silver"
+            width={160}
+            height={160}
+            className="object-contain -mr-4 relative z-10"
+          />
         </div>
-
-        {/* Right Image */}
-        <Image
-          src="/images/silver/silver-fine.png"
-          alt="silver"
-          width={160}
-          height={160}
-          className="object-contain -mr-4"
-        />
       </div>
 
       {/* 🔹 Dots */}
