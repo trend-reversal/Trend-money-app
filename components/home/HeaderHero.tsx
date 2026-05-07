@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function HeaderHero() {
   const assets = [
@@ -11,6 +12,7 @@ export default function HeaderHero() {
       starting: "₹10",
       label: "Returns",
       value: "25.0%*",
+      route: "/gold",
     },
     {
       name: "Silver",
@@ -18,6 +20,7 @@ export default function HeaderHero() {
       starting: "₹10",
       label: "Returns",
       value: "25.0%*",
+      route: "/silver",
     },
     {
       name: "Bond",
@@ -25,6 +28,7 @@ export default function HeaderHero() {
       starting: "₹1,000",
       label: "YTM upto",
       value: "12.5%*",
+      route: "/bonds",
     },
     {
       name: "FD",
@@ -32,15 +36,18 @@ export default function HeaderHero() {
       starting: "₹1,000",
       label: "Returns",
       value: "8.10%*",
+      route: "/fd",
     },
   ];
 
   const [index, setIndex] = useState(0);
+  const router = useRouter();
   const [trackX, setTrackX] = useState(0);
   const [animating, setAnimating] = useState(false);
   const [slidingDir, setSlidingDir] = useState<"next" | "prev" | null>(null);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
 
   const CENTER_CARD = 200;
   const SIDE_CARD = 148;
@@ -65,6 +72,7 @@ export default function HeaderHero() {
     }, 420);
   };
 
+  // ✅ Slide ke dauran incoming card grow karo, outgoing shrink karo
   const getCardSize = (offset: number) => {
     if (animating && slidingDir === "next") {
       if (offset === 1) return CENTER_CARD; // incoming → grow
@@ -79,44 +87,50 @@ export default function HeaderHero() {
 
   const handleTouchStart = (e: any) =>
     setTouchStart(e.targetTouches[0].clientX);
-  const handleTouchMove = (e: any) => setTouchEnd(e.targetTouches[0].clientX);
-  const handleTouchEnd = () => {
-    if (touchStart - touchEnd > 50) slide("next");
-    if (touchStart - touchEnd < -50) slide("prev");
+  const handleTouchMove = (e: any) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+
+    if (Math.abs(touchStart - e.targetTouches[0].clientX) > 10) {
+      setIsSwiping(true);
+    }
   };
+  const handleTouchEnd = () => {
+    if (touchStart - touchEnd > 50) {
+      slide("next");
+    } else if (touchStart - touchEnd < -50) {
+      slide("prev");
+    }
 
-  const user =
-    typeof window !== "undefined"
-      ? JSON.parse(localStorage.getItem("user") || "{}")
-      : {};
-
-  const firstName = user?.firstName
-    ? user.firstName.charAt(0).toUpperCase() +
-    user.firstName.slice(1)
-    : "Investor";
+    setTimeout(() => {
+      setIsSwiping(false);
+    }, 100);
+  };
 
   return (
     <section className="pt-24 pb-6 w-full h-[386px] -mt-[31px] bg-gradient-to-b from-[#7480FE] to-[#FFFFFF]">
       {/* Header */}
       <div className="flex justify-between items-center text-white px-6 mb-8">
         <div>
-          <h1 className="text-[24px] italic">Hi, {firstName}!</h1>
+          <h1 className="text-[24px] italic">Hi, Investor!</h1>
           <p className="text-[13px] mt-[2px]">
             Let's Build Your Financial Future
           </p>
         </div>
-        <div className="relative w-[48px] h-[48px]">
+        <div
+          className="relative w-[48px] h-[48px] cursor-pointer"
+          onClick={() => router.push("/profile")}
+        >
           <svg
             className="absolute inset-0 w-full h-full -rotate-90"
             viewBox="0 0 48 48"
           >
+            {/* ✅ No strokeOpacity here */}
             <circle
               cx="24"
               cy="24"
               r="21"
               fill="none"
-              stroke="white"
-              strokeOpacity="0.3"
+              stroke="#E5E5E5"
               strokeWidth="3"
             />
             <circle
@@ -126,12 +140,12 @@ export default function HeaderHero() {
               fill="none"
               stroke="#22C55E"
               strokeWidth="3"
-              strokeDasharray="132"
+              strokeDasharray="80"
               strokeDashoffset="33"
               strokeLinecap="round"
             />
           </svg>
-          <div className="absolute inset-[4px] bg-white rounded-full flex items-center justify-center">
+          <div className="absolute inset-[7px] bg-[#E5E5E5] rounded-full flex items-center justify-center">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="#929292">
               <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
             </svg>
@@ -139,6 +153,7 @@ export default function HeaderHero() {
         </div>
       </div>
 
+      {/* 🔥 Carousel */}
       <div
         className="relative overflow-hidden h-[220px]"
         onTouchStart={handleTouchStart}
@@ -163,6 +178,11 @@ export default function HeaderHero() {
             return (
               <div
                 key={offset}
+                onClick={() => {
+                  if (!isSwiping) {
+                    router.push(assets[i].route);
+                  }
+                }}
                 style={{
                   width: size,
                   height: size,
@@ -178,6 +198,7 @@ export default function HeaderHero() {
                     size === CENTER_CARD
                       ? "0 8px 24px rgba(0,0,0,0.10)"
                       : "0 4px 12px rgba(0,0,0,0.06)",
+                  // ✅ Track ke saath saath size bhi smoothly animate hoga
                   transition:
                     "width 420ms ease-in-out, height 420ms ease-in-out, padding 420ms ease-in-out, box-shadow 420ms ease-in-out",
                 }}
