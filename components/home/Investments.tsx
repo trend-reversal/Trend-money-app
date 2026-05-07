@@ -137,10 +137,21 @@ export default function Investments() {
         response?.data?.redirectUrl;
 
       if (redirectUrl) {
-        window.open(
-          redirectUrl,
-          "_blank"
-        );
+        if (
+          typeof window !== "undefined" &&
+          // @ts-ignore
+          window.ReactNativeWebView
+        ) {
+          // @ts-ignore
+          window.ReactNativeWebView.postMessage(
+            JSON.stringify({
+              type: "OPEN_BOND_URL",
+              url: redirectUrl,
+            })
+          );
+        } else {
+          window.open(redirectUrl, "_blank");
+        }
       }
     } catch (error) {
       console.error(
