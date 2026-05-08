@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   allowedDevOrigins: [
     "192.168.1.39",
   ],
@@ -10,7 +9,13 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "s3.ap-south-1.amazonaws.com",
+        hostname:
+          "trend-reversal-bucket.s3.us-east-1.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname:
+          "s3.ap-south-1.amazonaws.com",
       },
     ],
   },
