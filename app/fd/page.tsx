@@ -1,38 +1,68 @@
 "use client";
 
+import { useFDs } from "@/hooks/queries/useFDs";
+import { getFDRedirectUrl } from "@/lib/api/fd";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function FDPage() {
   const router = useRouter();
+  const { data, isLoading } = useFDs();
 
-  const fds = [
-    {
-      name: "Shriram Finance FD",
-      rating: "AAA • Low Risk",
-      min: "₹5,000",
-      tenure: "3 Years",
-      rate: "7.81%",
-      logo: "/images/shriram.png",
-    },
-    {
-      name: "Suryoday Finance FD",
-      rating: "AA • Moderate Risk",
-      min: "₹5,000",
-      tenure: "3 Years",
-      rate: "7.25%",
-      logo: "/images/suryoday.png",
-    },
-    {
-      name: "Unifinz Finance FD",
-      rating: "AA+ • Low Risk",
-      min: "₹5,000",
-      tenure: "3 Years",
-      rate: "7.50%",
-      logo: "/images/fd/bjaj.png",
-    },
-  ];
+  const pageData =
+    data?.data?.[0] || {};
 
+  const allFDs =
+    pageData?.bank_cards || [];
+
+
+
+  const fds = allFDs;
+  const bankLogos =
+    pageData?.bank_logos || [];
+
+  const handleFDClick = async (
+    issuer: string
+  ) => {
+    try {
+      const response =
+        await getFDRedirectUrl({
+          issuer,
+        });
+
+      const redirectUrl =
+        response?.data?.redirectUrl;
+
+      if (redirectUrl) {
+        if (typeof window !== "undefined") {
+          // @ts-ignore
+          const isReactNativeWebView =
+            !!window.ReactNativeWebView;
+
+          if (isReactNativeWebView) {
+            // @ts-ignore
+            window.ReactNativeWebView.postMessage(
+              JSON.stringify({
+                type: "OPEN_FD_URL",
+                url: redirectUrl,
+              })
+            );
+          } else {
+            window.open(
+              redirectUrl,
+              "_blank"
+            );
+          }
+        }
+      }
+    } catch (error) {
+      console.error(
+        "Failed to fetch FD redirect URL",
+        error
+      );
+    }
+  };
   return (
     <section className="min-h-screen bg-[#F7F8FA]">
       {/*  HEADER */}
@@ -75,61 +105,71 @@ export default function FDPage() {
         </div>
       </div>
 
-    
       {/*  LIST */}
       <div className="px-6 mt-5 space-y-4 pb-10">
-        {fds.map((item, i) => (
+        {fds.map((item: any, i: number) => (
           <div
             key={i}
-            className="bg-white rounded-[16px] p-4 shadow-sm border border-[#F0F0F0]"
+            className="bg-white rounded-[20px] p-4 border border-[#EEF0F4] shadow-[0px_4px_14px_rgba(15,23,42,0.05)]"
           >
-            {/* TOP */}
-            <div className="flex justify-between items-start">
-              <div className="flex gap-3">
-                <div className="w-[44px] h-[44px] relative">
+            <div className="flex justify-between items-start gap-3">
+              {/* LEFT */}
+              <div className="flex gap-3 flex-1">
+                <div className="w-[56px] h-[56px] relative rounded-full overflow-hidden border border-[#EEF0F4] bg-white">
                   <Image
-                    src={item.logo}
-                    alt=""
+                    src={
+                      item.logo ||
+                      "/images/fd/default.png"
+                    }
+                    alt={item.name}
                     fill
-                    className="object-contain"
+                    className="object-contain p-2"
                   />
                 </div>
 
-                <div>
-                  <p className="text-[15px] font-semibold text-[#1C1B1B]">
+                <div className="flex-1">
+                  <p className="text-[16px] font-semibold text-[#111827]">
                     {item.name}
                   </p>
-                  <p className="text-[12px] text-gray-500 mt-[2px]">
-                    {item.rating}
-                  </p>
+
+                  <div className="flex gap-2 mt-2 flex-wrap">
+                    <span className="text-[11px] bg-[#F3F4F6] text-[#4B5563] px-2 py-[4px] rounded-full">
+                      {item.rating}
+                    </span>
+
+                    <span className="text-[11px] bg-[#EEF2FF] text-[#5B6FFF] px-2 py-[4px] rounded-full">
+                      Min ₹
+                      {Number(
+                        item.min_investment
+                      ).toLocaleString("en-IN")}
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              {/* RATE */}
+              {/* RIGHT */}
               <div className="text-right">
-                <p className="text-[#16A34A] font-semibold text-[18px]">
-                  {item.rate}
+                <p className="text-[#16A34A] font-bold text-[20px] leading-none">
+                  {item.returns}%
                 </p>
-                <p className="text-[11px] text-gray-400">P.A.</p>
+
+                <p className="text-[11px] text-[#9CA3AF] mt-1">
+                  P.A.
+                </p>
               </div>
             </div>
 
-            {/* MID */}
-            <div className="mt-3">
-              <p className="text-[13px] text-gray-500">
-                Min. {item.min} • {item.tenure}
-              </p>
-            </div>
-
             {/* BOTTOM */}
-            <div className="mt-3 flex justify-between items-center">
-              {/* TAG */}
-              <span className="text-[10px] bg-[#ECFCF2] text-[#16A34A] px-2 py-[3px] rounded-[6px] font-medium">
-                Sell Anytime
+            <div className="flex justify-between items-center mt-5">
+              <span className="text-[11px] text-[#6B7280] font-medium">
+
               </span>
 
-              {/* BUTTON */}
-              <button className="text-[13px] bg-[#EEF2FF] text-[#5B6FFF] px-5 py-2 rounded-[10px] font-medium">
+              <button
+                onClick={() =>
+                  handleFDClick(item.issuer)
+                }
+                className="h-[32px] px-4 rounded-full bg-[#F5F7FF] text-[#4F46E5] text-[13px] font-medium">
                 View Details
               </button>
             </div>
@@ -151,20 +191,22 @@ export default function FDPage() {
 
           {/* ICONS */}
           <div className="flex justify-center items-center gap-3 mt-4">
-            {[
-              "/images/fd/state-bank.svg",
-              "/images/fd/hdfc.svg",
-              "/images/fd/icici.svg",
-              "/images/fd/axis.svg",
-              "/images/fd/kotak.svg",
-            ].map((icon, i) => (
-              <div
-                key={i}
-                className="w-[36px] h-[36px] rounded-full bg-white shadow-sm border border-[#F0F0F0] flex items-center justify-center"
-              >
-                <Image src={icon} alt="bank" width={20} height={20} />
-              </div>
-            ))}
+            {bankLogos.slice(0, 5).map(
+              (bank: any, i: number) => (
+                <div
+                  key={i}
+                  className="w-[36px] h-[36px] rounded-full bg-white shadow-sm border border-[#F0F0F0] flex items-center justify-center overflow-hidden"
+                >
+                  <Image
+                    src={bank.logo}
+                    alt={bank.name}
+                    width={20}
+                    height={20}
+                    className="object-contain"
+                  />
+                </div>
+              )
+            )}
 
             {/* +195 */}
             <div className="w-[36px] h-[36px] rounded-full bg-[#EEF2FF] flex items-center justify-center text-[12px] text-[#5B6FFF] font-medium">
@@ -190,38 +232,14 @@ export default function FDPage() {
         </h2>
 
         {/* 🔹 LIST */}
-        <div className="space-y-3">
-          {[
-            {
-              name: "Shriram Finance FD",
-              min: "₹5,000",
-              tenure: "3 Years",
-              rate: "7.81%",
-              logo: "/images/shriram.png",
-            },
-            {
-              name: "Mahindra Finance FD",
-              min: "₹5,000",
-              tenure: "3 Years",
-              rate: "7.25%",
-              logo: "/images/fd/mahindra.png",
-            },
-            {
-              name: "Suryoday Finance FD",
-              min: "₹5,000",
-              tenure: "N Years",
-              rate: "8.40%",
-              logo: "/images/suryoday.png",
-            },
-            {
-              name: "Bajaj Finance FD",
-              min: "₹5,000",
-              tenure: "N Years",
-              rate: "7.30%",
-              logo: "/images/fd/bjaj.png",
-            },
-          ].map((item, i) => (
+        <div
+
+          className="space-y-3">
+          {fds.map((item: any, i: number) => (
             <div
+              onClick={() =>
+                handleFDClick(item.issuer)
+              }
               key={i}
               className="bg-white rounded-[14px] border border-[#ECECEC] shadow-[0px_3px_6px_rgba(0,0,0,0.05)] px-4 py-3 flex justify-between items-center"
             >
@@ -241,7 +259,11 @@ export default function FDPage() {
                     {item.name}
                   </p>
                   <p className="text-[12px] text-gray-500 mt-[2px]">
-                    Min. {item.min} • {item.tenure}
+                    Min. ₹
+                    {Number(
+                      item.min_investment
+                    ).toLocaleString("en-IN")}{" "}
+                    • {item.rating}
                   </p>
                 </div>
               </div>
@@ -249,23 +271,16 @@ export default function FDPage() {
               {/* RIGHT */}
               <div className="text-right">
                 <p className="text-[#16A34A] font-semibold text-[15px]">
-                  {item.rate}
+                  {item.returns}%
                 </p>
                 <p className="text-[10px] text-gray-400">P.A.</p>
               </div>
             </div>
           ))}
         </div>
-
-        {/* 🔹 VIEW MORE */}
-        <div className="text-center mt-4">
-          <button className="text-[12px] text-gray-500 font-medium tracking-wide">
-            VIEW MORE FDs
-          </button>
-        </div>
       </div>
       {/* 🛡️ TRUST STRIP */}
-      <div className="flex items-center justify-center gap-2 text-[#6C7BFF] font-semibold text-[12px] tracking-wide">
+      <div className="flex items-center justify-center gap-2 text-[#6C7BFF] font-semibold text-[12px] tracking-wide pt-4">
         {/* Left Leaf */}
         <Image
           src="/images/lief-left.png"
