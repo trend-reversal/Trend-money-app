@@ -10,11 +10,12 @@ export default function GoldPage() {
 
   const [showAmountBox, setShowAmountBox] = useState(false);
   const [amount, setAmount] = useState("");
+  // Add this state alongside your existing states
+  const [selectedChip, setSelectedChip] = useState<string | null>(null);
+  const [showBreakdown, setShowBreakdown] = useState(false);
 
-  const {
-    mutate: createPaymentMutation,
-    isPending: isCreatingPayment,
-  } = useCreatePayment();
+  const { mutate: createPaymentMutation, isPending: isCreatingPayment } =
+    useCreatePayment();
 
   const handleStartInvestment = () => {
     if (!amount) return;
@@ -28,26 +29,22 @@ export default function GoldPage() {
       },
       {
         onSuccess: (response) => {
-          const checkoutUrl =
-            response?.checkout_url;
+          const checkoutUrl = response?.checkout_url;
 
           if (!checkoutUrl) return;
 
-          if (
-            typeof window !== "undefined" &&
-            window.ReactNativeWebView
-          ) {
+          if (typeof window !== "undefined" && window.ReactNativeWebView) {
             window.ReactNativeWebView.postMessage(
               JSON.stringify({
                 type: "OPEN_PAYMENT_PAGE",
                 url: checkoutUrl,
-              })
+              }),
             );
           } else {
             window.location.href = checkoutUrl;
           }
         },
-      }
+      },
     );
   };
 
@@ -236,18 +233,13 @@ export default function GoldPage() {
               <input
                 type="number"
                 value={amount}
-                onChange={(e) =>
-                  setAmount(e.target.value)
-                }
+                onChange={(e) => {
+                  setAmount(e.target.value);
+                  setSelectedChip(null); // clear chip selection on manual type
+                  setShowBreakdown(false);
+                }}
                 placeholder="Enter Amount"
-                className="
-            w-full
-            bg-transparent
-            outline-none
-            text-[20px]
-            text-black
-            placeholder:text-[#C7C7C7]
-          "
+                className="w-full bg-transparent outline-none text-[20px] text-black placeholder:text-[#C7C7C7]"
               />
             </div>
 
@@ -256,26 +248,141 @@ export default function GoldPage() {
               {["₹2,000", "₹5,000", "₹10,000", "₹15,000"].map((item, i) => (
                 <button
                   key={i}
-                  onClick={() =>
-                    setAmount(
-                      item.replace(/[₹,]/g, "")
-                    )
-                  }
-                  className="
-      px-4
-      h-[34px]
-      rounded-full
-      border border-[#E5E5E5]
-      bg-[#FAFAFA]
-      text-[15px]
-      text-[#7A7A7A]
-      whitespace-nowrap
-    "
+                  onClick={() => {
+                    const val = item.replace(/[₹,]/g, "");
+                    setAmount(val);
+                    setSelectedChip(item);
+                    setShowBreakdown(false);
+                  }}
+                  className={`
+            px-4 h-[34px] rounded-full border text-[15px] text-[#7A7A7A] whitespace-nowrap transition-all
+            ${
+              selectedChip === item
+                ? "border-[#D4AF37] bg-[#FFF8E7] text-[#B8860B] font-semibold"
+                : "border-[#E5E5E5] bg-[#FAFAFA]"
+            }
+          `}
                 >
                   {item}
                 </button>
               ))}
             </div>
+
+            {/* View Breakdown CTA — only shown when amount is set */}
+            {amount && (
+              <button
+                onClick={() => setShowBreakdown((prev) => !prev)}
+                className="flex items-center justify-between w-full mt-4 py-2"
+              >
+                <span className="text-[14px] text-[#111111] font-medium">
+                  View Breakdown
+                </span>
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  style={{
+                    transform: showBreakdown
+                      ? "rotate(180deg)"
+                      : "rotate(0deg)",
+                    transition: "transform 0.2s ease",
+                  }}
+                >
+                  <path
+                    d="M6 9L12 15L18 9"
+                    stroke="#111111"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            )}
+
+            {/* Breakdown Details */}
+            {showBreakdown && amount && (
+              <div className="mt-2 rounded-[16px] border border-[#ECECEC] bg-white overflow-hidden">
+                {/* Row: Gold Value */}
+                <div className="flex justify-between items-center px-4 py-3 border-b border-dashed border-[#ECECEC]">
+                  <span className="text-[14px] text-[#111111]">Gold Value</span>
+                  <span className="text-[14px] text-[#111111]">
+                    ₹{" "}
+                    {(Number(amount) * 0.9709).toLocaleString("en-IN", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+
+                {/* Row: GST */}
+                <div className="flex justify-between items-center px-4 py-3 border-b border-dashed border-[#ECECEC]">
+                  <span className="text-[14px] text-[#111111]">GST (3%)</span>
+                  <span className="text-[14px] text-[#111111]">
+                    ₹{" "}
+                    {(Number(amount) * 0.03).toLocaleString("en-IN", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+
+                {/* Row: Gold Quality */}
+                <div className="flex justify-between items-center px-4 py-3 border-b border-dashed border-[#ECECEC]">
+                  <span className="text-[14px] text-[#111111]">
+                    Gold quality
+                  </span>
+                  <span className="text-[14px] text-[#111111]">
+                    {(Number(amount) / 10646.08).toFixed(4)} gm
+                  </span>
+                </div>
+
+                {/* Row: Total Savings (green tinted) */}
+                <div className="flex justify-between items-center px-4 py-3 bg-[#EDFCF4] border-b border-dashed border-[#ECECEC]">
+                  <div>
+                    <p className="text-[14px] font-semibold text-[#16A34A]">
+                      Total Savings
+                    </p>
+                    <p className="text-[11px] text-[#16A34A] mt-[2px]">
+                      Coupon applied : GOLD100
+                    </p>
+                  </div>
+                  <span className="text-[14px] font-semibold text-[#16A34A]">
+                    ₹100
+                  </span>
+                </div>
+
+                {/* Row: Total Payable */}
+                <div className="flex justify-between items-center px-4 py-4 bg-[#EDFCF4]">
+                  <span className="text-[15px] font-semibold text-[#111111]">
+                    Total Payable amount
+                  </span>
+                  <span className="text-[15px] font-semibold text-[#111111]">
+                    ₹
+                    {Number(amount).toLocaleString("en-IN", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+
+                {/* Footer */}
+                <div className="flex items-center justify-center gap-1.5 py-3 border-t border-[#ECECEC]">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 2L4 6V12C4 16.418 7.582 20.418 12 22C16.418 20.418 20 16.418 20 12V6L12 2Z"
+                      stroke="#9CA3AF"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <span className="text-[12px] text-[#9CA3AF]">
+                    All Investment are secure
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -283,13 +390,10 @@ export default function GoldPage() {
       <div className="mt-6 flex justify-center">
         <button
           onClick={handleStartInvestment}
-          disabled={
-            !amount || isCreatingPayment
-          }
-          className="w-[330px] h-[51px] bg-[#111111] rounded-[8px] text-white text-[15px] font-medium flex items-center justify-center">
-          {isCreatingPayment
-            ? "Processing..."
-            : "Start Investing"}
+          disabled={!amount || isCreatingPayment}
+          className="w-[330px] h-[51px] bg-[#111111] rounded-[8px] text-white text-[15px] font-medium flex items-center justify-center"
+        >
+          {isCreatingPayment ? "Processing..." : "Start Investing"}
         </button>
       </div>
 
@@ -334,10 +438,11 @@ export default function GoldPage() {
             text-[18px]
             font-medium
             transition-all
-            ${tab === "3Y"
-                    ? "bg-[#D4AF37] border-[#D4AF37] text-white"
-                    : "bg-white border-[#E5E7EB] text-[#222222]"
-                  }
+            ${
+              tab === "3Y"
+                ? "bg-[#D4AF37] border-[#D4AF37] text-white"
+                : "bg-white border-[#E5E7EB] text-[#222222]"
+            }
           `}
               >
                 {tab}
