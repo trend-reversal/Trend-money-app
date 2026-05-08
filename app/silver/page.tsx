@@ -1,12 +1,45 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useCreatePayment } from "@/hooks/mutations/useCreatePayment";
 
-export default function GoldPage() {
+export default function SilverPage() {
   const router = useRouter();
 
+  const [showAmountBox, setShowAmountBox] = useState(false);
+  const [amount, setAmount] = useState("");
+  const [selectedChip, setSelectedChip] = useState<string | null>(null);
+  const [showBreakdown, setShowBreakdown] = useState(false);
+
+  const { mutate: createPaymentMutation, isPending: isCreatingPayment } =
+    useCreatePayment();
+
+  const handleStartInvestment = () => {
+    if (!amount) return;
+    createPaymentMutation(
+      {
+        amount: Number(amount),
+        safegold_tx_id: 2006745356,
+        productType: "SILVER",
+        deviceName: "mobile",
+      },
+      {
+        onSuccess: (response) => {
+          const checkoutUrl = response?.checkout_url;
+          if (!checkoutUrl) return;
+          if (typeof window !== "undefined" && window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(
+              JSON.stringify({ type: "OPEN_PAYMENT_PAGE", url: checkoutUrl }),
+            );
+          } else {
+            window.location.href = checkoutUrl;
+          }
+        },
+      },
+    );
+  };
   return (
     <div className="bg-white min-h-screen pb-6">
       {/* 🔹 Header */}
@@ -142,8 +175,19 @@ export default function GoldPage() {
               icon: "/images/gold/onetime.png",
             },
           ].map((item, i) => (
-            <div
+            <button
               key={i}
+              onClick={() => {
+                if (item.title === "Weekly SIP") {
+                  router.push("/silver/invest");
+                }
+                if (
+                  item.title === "Daily SIP" ||
+                  item.title === "Monthly SIP"
+                ) {
+                  setShowAmountBox(true);
+                }
+              }}
               className="
           relative
           w-full
@@ -154,6 +198,7 @@ export default function GoldPage() {
           shadow-[0px_4px_4px_rgba(0,0,0,0.04)]
           flex flex-col items-center justify-center
           overflow-hidden
+          active:scale-[0.98] transition
         "
             >
               {/* Recommended Tag */}
@@ -193,15 +238,174 @@ export default function GoldPage() {
               <p className="text-[13px] mt-2 text-center leading-tight text-[#1D1D1F] font-medium">
                 {item.title}
               </p>
-            </div>
+            </button>
           ))}
         </div>
+
+        {showAmountBox && (
+          <div className="mt-4">
+            <div className="w-full h-[74px] border border-[#E7E7E7] rounded-[16px] px-5 flex items-center bg-white">
+              <input
+                type="number"
+                value={amount}
+                onChange={(e) => {
+                  setAmount(e.target.value);
+                  setSelectedChip(null);
+                  setShowBreakdown(false);
+                }}
+                placeholder="Enter Amount"
+                className="w-full bg-transparent outline-none text-[20px] text-black placeholder:text-[#C7C7C7]"
+              />
+            </div>
+
+            <div className="flex gap-2 mt-3 overflow-x-auto no-scrollbar">
+              {["₹2,000", "₹5,000", "₹10,000", "₹15,000"].map((item, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    setAmount(item.replace(/[₹,]/g, ""));
+                    setSelectedChip(item);
+                    setShowBreakdown(false);
+                  }}
+                  className={`px-4 h-[34px] rounded-full border text-[15px] text-[#7A7A7A] whitespace-nowrap transition-all
+                    ${
+                      selectedChip === item
+                        ? "border-[#69A1E1] bg-[#EEF4FC] text-[#185FA5] font-semibold"
+                        : "border-[#E5E5E5] bg-[#FAFAFA]"
+                    }`}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+
+            {amount && (
+              <button
+                onClick={() => setShowBreakdown((prev) => !prev)}
+                className="flex items-center justify-between w-full mt-4 py-2"
+              >
+                <span className="text-[14px] text-[#111111] font-medium">
+                  View Breakdown
+                </span>
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  style={{
+                    transform: showBreakdown
+                      ? "rotate(180deg)"
+                      : "rotate(0deg)",
+                    transition: "transform 0.2s ease",
+                  }}
+                >
+                  <path
+                    d="M6 9L12 15L18 9"
+                    stroke="#111111"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            )}
+
+            {showBreakdown && amount && (
+              <div className="mt-2 rounded-[16px] border border-[#ECECEC] bg-white overflow-hidden">
+                {/* Silver Value */}
+                <div className="flex justify-between items-center px-4 py-4 bg-white">
+                  <span className="text-[14px] text-[#111111]">
+                    Silver Value
+                  </span>
+                  <span className="text-[14px] text-[#111111]">
+                    ₹{" "}
+                    {(Number(amount) * 0.9709).toLocaleString("en-IN", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+
+                {/* GST */}
+                <div className="flex justify-between items-center px-4 py-4 bg-white border-t border-dashed border-[#E5E5E5]">
+                  <span className="text-[14px] text-[#111111]">GST (3%)</span>
+                  <span className="text-[14px] text-[#111111]">
+                    ₹{" "}
+                    {(Number(amount) * 0.03).toLocaleString("en-IN", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+
+                {/* Silver Quality — solid separator above and below */}
+                <div className="flex justify-between items-center px-4 py-4 bg-white border-t border-[#E5E5E5]">
+                  <span className="text-[14px] text-[#111111]">
+                    Silver quality
+                  </span>
+                  <span className="text-[14px] text-[#111111]">
+                    {(Number(amount) / 1305.49).toFixed(4)} gm
+                  </span>
+                </div>
+
+                {/* Total Savings — green section */}
+                <div className="flex justify-between items-center px-4 py-4 bg-[#F0FBF4] border-t border-[#E5E5E5]">
+                  <div>
+                    <p className="text-[14px] font-semibold text-[#16A34A]">
+                      Total Savings
+                    </p>
+                    <p className="text-[11px] text-[#16A34A] mt-[2px]">
+                      Coupon applied : SILVER100
+                    </p>
+                  </div>
+                  <span className="text-[14px] font-semibold text-[#16A34A]">
+                    ₹100
+                  </span>
+                </div>
+
+                {/* Total Payable — solid border top, white bg */}
+                <div className="flex justify-between items-center px-4 py-4 bg-white border-t border-[#E5E5E5]">
+                  <span className="text-[15px] font-semibold text-[#111111]">
+                    Total Payable amount
+                  </span>
+                  <span className="text-[15px] font-semibold text-[#111111]">
+                    ₹
+                    {Number(amount).toLocaleString("en-IN", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+
+                {/* Footer */}
+                <div className="flex items-center justify-center gap-1.5 py-3 border-t border-[#ECECEC]">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 2L4 6V12C4 16.418 7.582 20.418 12 22C16.418 20.418 20 16.418 20 12V6L12 2Z"
+                      stroke="#9CA3AF"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <span className="text-[12px] text-[#9CA3AF]">
+                    All Investment are secure
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 🔹 CTA */}
       <div className="mt-6 flex justify-center">
-        <button className="w-[330px] h-[51px] bg-[#111111] rounded-[8px] text-white text-[15px] font-medium flex items-center justify-center">
-          Start Investing
+        <button
+          onClick={handleStartInvestment}
+          disabled={!amount || isCreatingPayment}
+          className="w-[330px] h-[51px] bg-[#111111] rounded-[8px] text-white text-[15px] font-medium flex items-center justify-center disabled:opacity-50"
+        >
+          {isCreatingPayment ? "Processing..." : "Start Investing"}
         </button>
       </div>
 
