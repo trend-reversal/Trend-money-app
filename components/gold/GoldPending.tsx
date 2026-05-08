@@ -26,7 +26,7 @@ export default function GoldPending() {
           Payment Pending
         </h1>
 
-        <p className="mt-3 text-[18px] text-[#000000] text-center leading-7 font-regular">
+        <p className="mt-3 text-[15px] text-[#000000] text-center leading-7 font-regular">
           We’ll notify you once your digital
           <br />
           gold is confirmed

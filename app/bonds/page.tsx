@@ -9,20 +9,16 @@ import { useState } from "react";
 export default function BondsPage() {
   const router = useRouter();
   const [active, setActive] = useState("All Bonds");
-  const [searchQuery, setSearchQuery] =
-    useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const { data, isLoading } = useAssets();
 
-  const [visibleCount, setVisibleCount] =
-    useState(6);
+  const [visibleCount, setVisibleCount] = useState(6);
 
-  const allBonds =
-    data?.data?.Bonds?.list || [];
+  const allBonds = data?.data?.Bonds?.list || [];
 
   /* FILTERED */
   const getRatingRank = (rating: string = "") => {
-    const normalized =
-      rating.toUpperCase();
+    const normalized = rating.toUpperCase();
 
     const ratingOrder = [
       "AAA",
@@ -40,9 +36,7 @@ export default function BondsPage() {
       "BB-",
     ];
 
-    const index = ratingOrder.findIndex((r) =>
-      normalized.includes(r)
-    );
+    const index = ratingOrder.findIndex((r) => normalized.includes(r));
 
     return index === -1 ? 999 : index;
   };
@@ -52,122 +46,80 @@ export default function BondsPage() {
       return list;
     }
 
-    const query =
-      searchQuery.toLowerCase().trim();
+    const query = searchQuery.toLowerCase().trim();
 
-    const numberMatch =
-      query.match(/\d+(\.\d+)?/);
+    const numberMatch = query.match(/\d+(\.\d+)?/);
 
-    const numeric = numberMatch
-      ? parseFloat(numberMatch[0])
-      : null;
+    const numeric = numberMatch ? parseFloat(numberMatch[0]) : null;
 
-    const isPercentQuery =
-      query.includes("%");
+    const isPercentQuery = query.includes("%");
 
-    const isMonthQuery =
-      query.includes("month");
+    const isMonthQuery = query.includes("month");
 
     return list.filter((bond: any) => {
-      const rating =
-        bond.rating?.toLowerCase() || "";
+      const rating = bond.rating?.toLowerCase() || "";
 
       const company = `
       ${bond.description || ""}
       ${bond.partnerName || ""}
     `.toLowerCase();
 
-      const ytm =
-        Number(bond.preTaxYield) || 0;
+      const ytm = Number(bond.preTaxYield) || 0;
 
-      const tenure =
-        Number(bond.timeToMaturity) || 0;
+      const tenure = Number(bond.timeToMaturity) || 0;
 
       /* TEXT */
-      const matchesText =
-        rating.includes(query) ||
-        company.includes(query);
+      const matchesText = rating.includes(query) || company.includes(query);
 
       /* YTM */
       let matchesYTM = false;
 
-      if (
-        numeric !== null &&
-        isPercentQuery
-      ) {
-        matchesYTM =
-          Math.abs(ytm - numeric) < 0.01;
+      if (numeric !== null && isPercentQuery) {
+        matchesYTM = Math.abs(ytm - numeric) < 0.01;
       }
 
       /* TENURE */
       let matchesTenure = false;
 
-      if (
-        numeric !== null &&
-        isMonthQuery
-      ) {
-        matchesTenure =
-          Math.abs(tenure - numeric) <= 2;
+      if (numeric !== null && isMonthQuery) {
+        matchesTenure = Math.abs(tenure - numeric) <= 2;
       }
 
       /* GENERIC NUMBER */
       let matchesGeneric = false;
 
-      if (
-        numeric !== null &&
-        !isPercentQuery &&
-        !isMonthQuery
-      ) {
+      if (numeric !== null && !isPercentQuery && !isMonthQuery) {
         matchesGeneric =
-          Math.abs(ytm - numeric) <= 0.5 ||
-          Math.abs(tenure - numeric) <= 2;
+          Math.abs(ytm - numeric) <= 0.5 || Math.abs(tenure - numeric) <= 2;
       }
 
-      return (
-        matchesText ||
-        matchesYTM ||
-        matchesTenure ||
-        matchesGeneric
-      );
+      return matchesText || matchesYTM || matchesTenure || matchesGeneric;
     });
   };
 
   const filteredBonds = [...allBonds];
 
   if (active === "High Returns") {
-    filteredBonds.sort(
-      (a, b) =>
-        (b.preTaxYield || 0) -
-        (a.preTaxYield || 0)
-    );
+    filteredBonds.sort((a, b) => (b.preTaxYield || 0) - (a.preTaxYield || 0));
   }
 
   if (active === "High Rated") {
     filteredBonds.sort(
-      (a, b) =>
-        getRatingRank(a.rating) -
-        getRatingRank(b.rating)
+      (a, b) => getRatingRank(a.rating) - getRatingRank(b.rating),
     );
   }
 
   if (active === "Short Term") {
     filteredBonds.sort(
-      (a, b) =>
-        (a.timeToMaturity || 0) -
-        (b.timeToMaturity || 0)
+      (a, b) => (a.timeToMaturity || 0) - (b.timeToMaturity || 0),
     );
   }
 
-  const searchedBonds =
-    applySearchFilter(filteredBonds);
+  const searchedBonds = applySearchFilter(filteredBonds);
 
-  const bonds = searchedBonds.slice(
-    0,
-    visibleCount
-  );
+  const bonds = searchedBonds.slice(0, visibleCount);
 
-  const hasMore =
-    visibleCount < searchedBonds.length;
+  const hasMore = visibleCount < searchedBonds.length;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -198,17 +150,11 @@ export default function BondsPage() {
       return "Low Risk";
     }
 
-    if (
-      normalized.includes("BBB+") ||
-      normalized.includes("BBB")
-    ) {
+    if (normalized.includes("BBB+") || normalized.includes("BBB")) {
       return "Moderate Risk";
     }
 
-    if (
-      normalized.includes("BBB-") ||
-      normalized.includes("BB")
-    ) {
+    if (normalized.includes("BBB-") || normalized.includes("BB")) {
       return "Moderately High Risk";
     }
 
@@ -220,9 +166,7 @@ export default function BondsPage() {
       return "/risk-meter/IND-BBB.png";
     }
 
-    const formattedRating = rating
-      .trim()
-      .replace(/\s+/g, "-");
+    const formattedRating = rating.trim().replace(/\s+/g, "-");
 
     return `/risk-meter/${formattedRating}.png`;
   };
@@ -237,26 +181,20 @@ export default function BondsPage() {
     assetId: number;
   }) => {
     try {
-      const response =
-        await getBondRedirectUrl({
-          page,
-          section,
-          assetId,
-        });
+      const response = await getBondRedirectUrl({
+        page,
+        section,
+        assetId,
+      });
 
-      const redirectUrl =
-        response?.data?.redirectUrl;
+      const redirectUrl = response?.data?.redirectUrl;
 
       if (redirectUrl) {
         if (typeof window !== "undefined") {
           // @ts-ignore
-          const isReactNativeWebView =
-            !!window.ReactNativeWebView;
+          const isReactNativeWebView = !!window.ReactNativeWebView;
 
-          console.log(
-            "IS_RN_WEBVIEW",
-            isReactNativeWebView
-          );
+          console.log("IS_RN_WEBVIEW", isReactNativeWebView);
 
           if (isReactNativeWebView) {
             // @ts-ignore
@@ -264,7 +202,7 @@ export default function BondsPage() {
               JSON.stringify({
                 type: "OPEN_BOND_URL",
                 url: redirectUrl,
-              })
+              }),
             );
           } else {
             window.open(redirectUrl, "_blank");
@@ -272,15 +210,12 @@ export default function BondsPage() {
         }
       }
     } catch (error) {
-      console.error(
-        "Failed to fetch redirect URL",
-        error
-      );
+      console.error("Failed to fetch redirect URL", error);
     }
   };
 
   return (
-    <section className="min-h-screen bg-[#F7F8FA]">
+    <section className="min-h-screen bg-white">
       <div className="flex items-center justify-between px-6 pt-12 pb-4 bg-white">
         <button
           onClick={() => router.back()}
@@ -347,7 +282,7 @@ export default function BondsPage() {
       </div>
 
       <div className="px-6 mt-4">
-        <div className="relative w-full h-[160px] rounded-[16px] overflow-hidden shadow-sm">
+        <div className="relative w-full h-[160px]  overflow-hidden">
           <Image
             src="/images/bond/bond-main.png"
             alt="bond-banner"
@@ -356,10 +291,9 @@ export default function BondsPage() {
             priority
           />
         </div>
-
       </div>
 
-      <div className="flex gap-3 px-4 mt-5 overflow-x-auto no-scrollbar whitespace-nowrap">
+      <div className="flex gap-4 px-6 mt-8 overflow-x-auto no-scrollbar whitespace-nowrap">
         {["All Bonds", "High Returns", "High Rated", "Short Term"].map(
           (f, i) => (
             <button
@@ -368,10 +302,11 @@ export default function BondsPage() {
                 setActive(f);
                 setVisibleCount(6);
               }}
-              className={`h-[35px] px-[16px] rounded-[6.77px] border text-[12px] font-medium flex items-center justify-center whitespace-nowrap flex-shrink-0 transition-all duration-200 ${active === f
-                ? "bg-[#EEF2FF] text-[#5B6FFF] border-[#5B6FFF]"
-                : "bg-white border-[#E5E7EB] text-[#5F6368]"
-                }`}
+              className={`h-[52px] px-7 rounded-[14px] border text-[16px] font-semibold flex items-center justify-center whitespace-nowrap flex-shrink-0 transition-all duration-200 ${
+                active === f
+                  ? "bg-[#EEF2FF] text-[#5B6FFF] border-[#5B6FFF]"
+                  : "bg-white border-[#E5E7EB] text-[#5F6368]"
+              }`}
             >
               {f}
             </button>
@@ -381,8 +316,7 @@ export default function BondsPage() {
 
       <div className="px-6 mt-5 space-y-4 pb-10">
         {bonds.map((item: any, i: any) => {
-          const primaryBadge =
-            item.badges?.find((b: any) => b) || "New";
+          const primaryBadge = item.badges?.find((b: any) => b) || "New";
 
           return (
             <div
@@ -391,10 +325,11 @@ export default function BondsPage() {
             >
               {/* BADGE */}
               <span
-                className={`absolute top-0 right-4 -translate-y-1/2 text-[10px] px-3 py-[5px] rounded-full font-medium tracking-wide ${primaryBadge.toLowerCase().includes("trend")
-                  ? "bg-[#F3E8FF] text-[#7C3AED]"
-                  : "bg-[#ECFDF3] text-[#16A34A]"
-                  }`}
+                className={`absolute top-0 right-4 -translate-y-1/2 text-[10px] px-3 py-[5px] rounded-full font-medium tracking-wide ${
+                  primaryBadge.toLowerCase().includes("trend")
+                    ? "bg-[#F3E8FF] text-[#7C3AED]"
+                    : "bg-[#ECFDF3] text-[#16A34A]"
+                }`}
               >
                 {primaryBadge}
               </span>
@@ -406,10 +341,7 @@ export default function BondsPage() {
                   {/* LOGO */}
                   <div className="w-[56px] h-[56px] min-w-[56px] relative rounded-full overflow-hidden bg-white border border-[#EEF0F4] shadow-sm">
                     <Image
-                      src={
-                        item.logo ||
-                        "/images/bond/default-bond.png"
-                      }
+                      src={item.logo || "/images/bond/default-bond.png"}
                       alt={item.description}
                       fill
                       className="object-contain scale-[1.18] p-[6px]"
@@ -441,9 +373,7 @@ export default function BondsPage() {
                     {item.preTaxYield}%
                   </p>
 
-                  <p className="text-[11px] text-[#9CA3AF] mt-[4px]">
-                    YTM
-                  </p>
+                  <p className="text-[11px] text-[#9CA3AF] mt-[4px]">YTM</p>
                 </div>
               </div>
 
@@ -511,9 +441,7 @@ export default function BondsPage() {
       {hasMore && (
         <div className="text-center mt-6">
           <button
-            onClick={() =>
-              setVisibleCount((prev) => prev + 6)
-            }
+            onClick={() => setVisibleCount((prev) => prev + 6)}
             className="text-[#5B6FFF] text-[12px] font-semibold"
           >
             VIEW MORE
@@ -543,25 +471,39 @@ export default function BondsPage() {
       </div>
 
       <div className="mt-6 px-6 overflow-x-auto">
-        <div className="flex gap-4 w-max">
-          {/* Card 1 */}
-          <div className="relative w-[300px] h-[200px] rounded-[16px] overflow-hidden shadow-sm bg-white flex-shrink-0">
+        <div className="flex gap-4 w-max py-3">
+          <div
+            className="relative flex-shrink-0 rounded-[16px] overflow-hidden"
+            style={{
+              width: "277px",
+              height: "247px",
+              transform: "rotate(0.29deg)",
+              marginTop: "6.39px",
+            }}
+          >
             <Image
               src="/images/bond/learn1.png"
               alt="learn"
               fill
-              className="object-contain p-2"
+              className="object-cover"
               priority
             />
           </div>
 
-          {/* Card 2 */}
-          <div className="relative w-[300px] h-[200px] rounded-[16px] overflow-hidden shadow-sm bg-white flex-shrink-0">
+          <div
+            className="relative flex-shrink-0 rounded-[16px] overflow-hidden"
+            style={{
+              width: "277px",
+              height: "247px",
+              transform: "rotate(0.29deg)",
+              marginTop: "6.39px",
+            }}
+          >
             <Image
               src="/images/bond/learn2.png"
               alt="learn"
               fill
-              className="object-contain p-2"
+              className="object-cover"
             />
           </div>
         </div>

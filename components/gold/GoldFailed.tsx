@@ -23,7 +23,7 @@ export default function GoldFailed() {
         Payment Failed
       </h1>
 
-      <p className="mt-4 text-[24px] text-[#111111] text-center leading-[36px] font-normal px-2">
+      <p className="mt-4 text-[12px] text-[#111111] text-center leading-[36px] font-normal px-2">
         Something went wrong with your
         <br />
         transaction. Please check your payment
