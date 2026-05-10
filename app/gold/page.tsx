@@ -43,11 +43,25 @@ export default function GoldPage() {
         buy_price: Number(amount),
       });
 
+      if (
+        !breakdown?.gold_amount ||
+        !amount
+      ) {
+        alert(
+          "Unable to fetch gold quantity",
+        );
+
+        setIsProcessing(false);
+
+        return;
+      }
+
       sessionStorage.setItem(
         "gold_purchase_meta",
         JSON.stringify({
-          goldAmount: breakdown?.gold_amount,
-          amount: verifyResponse.buy_price,
+          goldAmount:
+            breakdown.gold_amount,
+          amount: Number(amount),
         }),
       );
 
