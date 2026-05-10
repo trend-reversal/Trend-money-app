@@ -17,17 +17,22 @@ export default function GoldSuccess({
   gold,
 }: Props) {
   const [finalAmount, setFinalAmount] =
-    useState(amount || "");
+    useState<number | null>(
+      amount ? Number(amount) : null,
+    );
 
   const [finalGold, setFinalGold] =
-    useState(gold || "");
+    useState<number | null>(
+      gold ? Number(gold) : null,
+    );
 
   useEffect(() => {
-    /*
-     * FALLBACK FROM SESSION STORAGE
-     */
-
-    if (amount && gold) return;
+    if (
+      finalAmount !== null &&
+      finalGold !== null
+    ) {
+      return;
+    }
 
     const stored =
       sessionStorage.getItem(
@@ -38,14 +43,22 @@ export default function GoldSuccess({
 
     const parsed = JSON.parse(stored);
 
-    setFinalAmount(
-      parsed?.amount || "",
-    );
+    if (
+      parsed?.amount &&
+      parsed?.goldAmount
+    ) {
+      setFinalAmount(
+        Number(parsed.amount),
+      );
 
-    setFinalGold(
-      parsed?.goldAmount || "",
-    );
-  }, [amount, gold]);
+      setFinalGold(
+        Number(parsed.goldAmount),
+      );
+    }
+  }, [
+    finalAmount,
+    finalGold,
+  ]);
 
   const handleDownloadInvoice =
     async () => {
@@ -119,7 +132,7 @@ export default function GoldSuccess({
             </p>
 
             <h2 className="mt-1 text-[28px] font-bold text-[#111827]">
-              {finalGold || "0"} g
+              {finalGold?.toFixed(4)} g
             </h2>
 
             <p className="mt-1 text-[14px] font-semibold tracking-wide text-[#9CA3AF]">
@@ -146,14 +159,9 @@ export default function GoldSuccess({
           </span>
 
           <span className="text-[22px] font-semibold text-[#111827]">
-            ₹
-            {finalAmount
-              ? Number(
-                finalAmount,
-              ).toLocaleString(
-                "en-IN",
-              )
-              : "0"}
+            ₹ {finalAmount?.toLocaleString(
+              "en-IN",
+            )}
           </span>
         </div>
 
