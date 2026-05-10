@@ -2,13 +2,12 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useCreatePayment } from "@/hooks/mutations/useCreatePayment";
 import { useGoldPrice } from "@/hooks/queries/useGoldPrice";
 import { useGoldBreakdown } from "@/hooks/queries/useGoldBreakdown";
 import BottomSheet from "@/components/common/BottomSheet";
-import { confirmGoldPurchase, getGoldPurchaseStatus, verifyGoldPurchase } from "@/lib/api/safegold";
-import { checkPaymentStatus } from "@/lib/api/payments";
+import { verifyGoldPurchase } from "@/lib/api/safegold";
 export default function GoldPage() {
   const router = useRouter();
 
@@ -16,47 +15,7 @@ export default function GoldPage() {
   const [amount, setAmount] = useState("");
   const [selectedChip, setSelectedChip] = useState<string | null>(null);
   const [showBreakdown, setShowBreakdown] = useState(false);
-  const [txId, setTxId] = useState<number | null>(null);
-  const [orderId, setOrderId] = useState<string | null>(null);
-  const [isPolling, setIsPolling] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      /*
-       * USER RETURNED FROM PHONEPE
-       */
-
-      if (
-        document.visibilityState === "visible" &&
-        orderId &&
-        txId &&
-        !isPolling
-      ) {
-        console.log(
-          "Resuming payment polling...",
-        );
-
-        startPaymentPolling(
-          orderId,
-          txId,
-        );
-      }
-    };
-
-    document.addEventListener(
-      "visibilitychange",
-      handleVisibilityChange,
-    );
-
-    return () => {
-      document.removeEventListener(
-        "visibilitychange",
-        handleVisibilityChange,
-      );
-    };
-  }, [orderId, txId, isPolling]);
-
 
   const { data: livePrice } = useGoldPrice();
   const { mutate: createPaymentMutation, isPending: isCreatingPayment } =
@@ -90,7 +49,6 @@ export default function GoldPage() {
         throw new Error("TX ID missing");
       }
 
-      setTxId(generatedTxId);
 
       createPaymentMutation(
         {
@@ -109,8 +67,6 @@ export default function GoldPage() {
               setIsProcessing(false);
               return;
             }
-
-            setOrderId(generatedOrderId);
 
             /*
              * MOBILE APP
@@ -143,174 +99,6 @@ export default function GoldPage() {
       );
     } catch (err) {
       console.log(err);
-      setIsProcessing(false);
-    }
-  };
-
-  const startPaymentPolling = async (
-    orderId: string,
-    txId: number,
-  ) => {
-    try {
-
-      if (isPolling) return;
-
-      setIsPolling(true);
-
-      let attempts = 0;
-
-      const poll = setInterval(async () => {
-        attempts++;
-
-        if (attempts > 40) {
-          clearInterval(poll);
-
-          setIsPolling(false);
-          setIsProcessing(false);
-
-          router.push("/gold/failed");
-
-          return;
-        }
-
-        try {
-          /*
-           * STEP 1
-           * PAYMENT STATUS
-           */
-
-          const paymentStatus =
-            await checkPaymentStatus(
-              orderId,
-            );
-
-          const state =
-            paymentStatus?.state;
-
-          console.log(
-            "PAYMENT STATE:",
-            state,
-          );
-
-          /*
-           * PAYMENT SUCCESS
-           */
-
-          if (state === "COMPLETED") {
-            clearInterval(poll);
-
-            /*
-             * STEP 2
-             * BUY CONFIRM
-             */
-
-            await confirmGoldPurchase({
-              tx_id: txId,
-            });
-
-            /*
-             * STEP 3
-             * BUY STATUS
-             */
-
-            const buyStatus =
-              await getGoldPurchaseStatus(
-                txId,
-              );
-
-            const status =
-              buyStatus?.status;
-
-            console.log(
-              "SAFEGOLD STATUS:",
-              status,
-            );
-
-            setIsPolling(false);
-            setIsProcessing(false);
-
-            /*
-             * SUCCESS
-             */
-
-            if (status === 1) {
-              router.push(
-                `/gold/success?amount=${amount}&txId=${txId}&gold=${buyStatus.gold_amount}`
-              );
-
-              return;
-            }
-
-            /*
-             * PENDING
-             */
-
-            if (status === 0) {
-              router.push(
-                "/gold/pending",
-              );
-
-              return;
-            }
-
-            /*
-             * FAILED
-             */
-
-            if (status === 2) {
-              router.push(
-                "/gold/failed",
-              );
-
-              return;
-            }
-
-            /*
-             * UNKNOWN STATUS
-             */
-
-            router.push(
-              "/gold/pending",
-            );
-
-            return;
-          }
-
-          /*
-           * PAYMENT FAILED
-           */
-
-          if (
-            state === "FAILED" ||
-            state === "CANCELLED"
-          ) {
-            clearInterval(poll);
-
-            setIsPolling(false);
-            setIsProcessing(false);
-
-            router.push(
-              "/gold/failed",
-            );
-
-            return;
-          }
-
-          /*
-           * STILL PENDING
-           */
-
-          console.log(
-            "Payment pending..."
-          );
-        } catch (err) {
-          console.log(err);
-        }
-      }, 3000);
-    } catch (err) {
-      console.log(err);
-
-      setIsPolling(false);
       setIsProcessing(false);
     }
   };
@@ -566,12 +354,11 @@ export default function GoldPage() {
           disabled={
             !amount ||
             isCreatingPayment ||
-            isProcessing ||
-            isPolling
+            isProcessing
           }
           className="w-[330px] h-[51px] bg-[#111111] rounded-[8px] text-white text-[15px] font-medium flex items-center justify-center"
         >
-          {isProcessing || isPolling
+          {isProcessing
             ? "Processing..."
             : "Start Investing"}
         </button>
