@@ -84,3 +84,18 @@ export const fetchGoldInvoice = async (
 
     return data;
 };
+
+export const getGoldTransactionDetails =
+    async (txId: number) => {
+        const { data } =
+            await axiosInstance.get(
+                "/metals/safegold/transaction-details",
+                {
+                    params: {
+                        txId,
+                    },
+                },
+            );
+
+        return data;
+    };

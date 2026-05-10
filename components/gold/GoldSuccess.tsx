@@ -3,62 +3,56 @@
 import Image from "next/image";
 import { Download } from "lucide-react";
 import { useEffect, useState } from "react";
-import { fetchGoldInvoice } from "@/lib/api/safegold";
+
+import {
+  fetchGoldInvoice,
+  getGoldTransactionDetails,
+} from "@/lib/api/safegold";
 
 type Props = {
-  amount?: string;
   txId?: string;
-  gold?: string;
+};
+
+type TransactionDetails = {
+  goldAmount: string;
+  buyPrice: number;
+  invoiceUrl: string;
 };
 
 export default function GoldSuccess({
-  amount,
   txId,
-  gold,
 }: Props) {
-  const [finalAmount, setFinalAmount] =
-    useState<number | null>(
-      amount ? Number(amount) : null,
+  const [details, setDetails] =
+    useState<TransactionDetails | null>(
+      null,
     );
 
-  const [finalGold, setFinalGold] =
-    useState<number | null>(
-      gold ? Number(gold) : null,
-    );
+  const [loading, setLoading] =
+    useState(true);
 
   useEffect(() => {
-    if (
-      finalAmount !== null &&
-      finalGold !== null
-    ) {
-      return;
-    }
+    const fetchDetails =
+      async () => {
+        try {
+          if (!txId) return;
 
-    const stored =
-      sessionStorage.getItem(
-        "gold_purchase_meta",
-      );
+          const response =
+            await getGoldTransactionDetails(
+              Number(txId),
+            );
 
-    if (!stored) return;
+          setDetails(
+            response?.data,
+          );
+        } catch (error) {
+          console.log(error);
+        } finally {
+          setLoading(false);
+        }
+      };
 
-    const parsed = JSON.parse(stored);
-
-    if (
-      parsed?.amount &&
-      parsed?.goldAmount
-    ) {
-      setFinalAmount(
-        Number(parsed.amount),
-      );
-
-      setFinalGold(
-        Number(parsed.goldAmount),
-      );
-    }
-  }, [
-    finalAmount,
-    finalGold,
-  ]);
+    fetchDetails();
+  }, [txId]);
 
   const handleDownloadInvoice =
     async () => {
@@ -72,7 +66,8 @@ export default function GoldSuccess({
 
         const invoiceUrl =
           response?.link ||
-          response?.data?.link;
+          response?.data?.link ||
+          details?.invoiceUrl;
 
         if (!invoiceUrl) {
           alert(
@@ -94,6 +89,16 @@ export default function GoldSuccess({
         );
       }
     };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <p className="text-[16px] text-[#777777]">
+          Loading transaction...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center px-4 pt-16 pb-10 max-w-[430px] mx-auto">
@@ -132,7 +137,10 @@ export default function GoldSuccess({
             </p>
 
             <h2 className="mt-1 text-[28px] font-bold text-[#111827]">
-              {finalGold?.toFixed(4)} g
+              {Number(
+                details?.goldAmount,
+              ).toFixed(4)}{" "}
+              g
             </h2>
 
             <p className="mt-1 text-[14px] font-semibold tracking-wide text-[#9CA3AF]">
@@ -159,7 +167,10 @@ export default function GoldSuccess({
           </span>
 
           <span className="text-[22px] font-semibold text-[#111827]">
-            ₹ {finalAmount?.toLocaleString(
+            ₹
+            {Number(
+              details?.buyPrice,
+            ).toLocaleString(
               "en-IN",
             )}
           </span>
@@ -184,7 +195,8 @@ export default function GoldSuccess({
 
       <button
         onClick={handleDownloadInvoice}
-        className="flex items-center gap-2 mt-7 text-[16px] font-medium text-black">
+        className="flex items-center gap-2 mt-7 text-[16px] font-medium text-black"
+      >
         Download Invoice
         <Download size={20} />
       </button>

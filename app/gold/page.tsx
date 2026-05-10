@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCreatePayment } from "@/hooks/mutations/useCreatePayment";
 import { useGoldPrice } from "@/hooks/queries/useGoldPrice";
@@ -9,7 +8,6 @@ import { useGoldBreakdown } from "@/hooks/queries/useGoldBreakdown";
 import BottomSheet from "@/components/common/BottomSheet";
 import { verifyGoldPurchase } from "@/lib/api/safegold";
 export default function GoldPage() {
-  const router = useRouter();
 
   const [showAmountBox, setShowAmountBox] = useState(false);
   const [amount, setAmount] = useState("");
@@ -42,35 +40,11 @@ export default function GoldPage() {
         gold_amount: breakdown?.gold_amount,
         buy_price: Number(amount),
       });
-
-      if (
-        !breakdown?.gold_amount ||
-        !amount
-      ) {
-        alert(
-          "Unable to fetch gold quantity",
-        );
-
-        setIsProcessing(false);
-
-        return;
-      }
-
-      sessionStorage.setItem(
-        "gold_purchase_meta",
-        JSON.stringify({
-          goldAmount:
-            breakdown.gold_amount,
-          amount: Number(amount),
-        }),
-      );
-
       const generatedTxId = verifyResponse?.tx_id;
 
       if (!generatedTxId) {
         throw new Error("TX ID missing");
       }
-
 
       createPaymentMutation(
         {
@@ -130,7 +104,7 @@ export default function GoldPage() {
       <div className="flex items-center justify-between px-6 pt-12 pb-4 bg-white">
         {/* Back Button */}
         <button
-          onClick={() => router.back()}
+          onClick={() => window.history.back()}
           className="p-2 active:scale-90 transition"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -259,15 +233,26 @@ export default function GoldPage() {
             <button
               key={i}
               onClick={() => {
-                if (
-                  item.title === "Weekly SIP" ||
-                  item.title === "Monthly SIP"
-                ) {
-                  router.push("/gold/invest");
-                }
+                /*
+                 * RESET
+                 */
 
-                if (item.title === "Daily SIP") {
+                setAmount("");
+                setSelectedChip(null);
+                setShowBreakdown(false);
+
+                /*
+                 * ONLY ONE TIME INVESTMENT
+                 * SHOULD OPEN PAYMENT FLOW
+                 */
+
+                if (
+                  item.title ===
+                  "One-Time Investment"
+                ) {
                   setShowAmountBox(true);
+                } else {
+                  setShowAmountBox(false);
                 }
               }}
               className="
@@ -370,21 +355,23 @@ export default function GoldPage() {
         )}
       </div>
 
-      <div className="mt-6 flex justify-center">
-        <button
-          onClick={handleStartInvestment}
-          disabled={
-            !amount ||
-            isCreatingPayment ||
-            isProcessing
-          }
-          className="w-[330px] h-[51px] bg-[#111111] rounded-[8px] text-white text-[15px] font-medium flex items-center justify-center"
-        >
-          {isProcessing
-            ? "Processing..."
-            : "Start Investing"}
-        </button>
-      </div>
+      {showAmountBox && (
+        <div className="mt-6 flex justify-center">
+          <button
+            onClick={handleStartInvestment}
+            disabled={
+              !amount ||
+              isCreatingPayment ||
+              isProcessing
+            }
+            className="w-[330px] h-[51px] bg-[#111111] rounded-[8px] text-white text-[15px] font-medium flex items-center justify-center"
+          >
+            {isProcessing
+              ? "Processing..."
+              : "Start Investing"}
+          </button>
+        </div>
+      )}
 
       <div className="px-4 mt-6">
         <Image
