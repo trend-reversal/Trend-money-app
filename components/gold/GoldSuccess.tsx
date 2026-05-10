@@ -58,8 +58,8 @@ export default function GoldSuccess({
           );
 
         const invoiceUrl =
-          response?.invoice_url ||
-          response?.data?.invoice_url;
+          response?.link ||
+          response?.data?.link;
 
         if (!invoiceUrl) {
           alert(
