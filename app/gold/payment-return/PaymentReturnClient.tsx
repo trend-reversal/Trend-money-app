@@ -53,6 +53,7 @@ export default function PaymentReturnClient({
 
                     await confirmGoldPurchase({
                         tx_id: Number(txId),
+                        pincode: 201301,
                     });
 
                     const buyStatus =

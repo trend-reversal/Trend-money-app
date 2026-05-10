@@ -38,6 +38,7 @@ export const verifyGoldPurchase = async (payload: {
 
 export const confirmGoldPurchase = async (payload: {
     tx_id: number;
+    pincode: number;
 }) => {
     const { data } = await axiosInstance.post(
         "/metals/safegold/buy-confirm",
@@ -64,6 +65,22 @@ export const fetchGoldBalance = async () => {
     const { data } = await axiosInstance.get(
         "/metals/safegold/fetch-balance",
     );
+
+    return data;
+};
+
+export const fetchGoldInvoice = async (
+    tx_id: number,
+) => {
+    const { data } =
+        await axiosInstance.get(
+            "/metals/safegold/invoice-fetch",
+            {
+                params: {
+                    tx_id,
+                },
+            },
+        );
 
     return data;
 };

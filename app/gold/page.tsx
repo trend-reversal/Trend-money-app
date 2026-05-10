@@ -43,6 +43,14 @@ export default function GoldPage() {
         buy_price: Number(amount),
       });
 
+      sessionStorage.setItem(
+        "gold_purchase_meta",
+        JSON.stringify({
+          goldAmount: breakdown?.gold_amount,
+          amount: verifyResponse.buy_price,
+        }),
+      );
+
       const generatedTxId = verifyResponse?.tx_id;
 
       if (!generatedTxId) {

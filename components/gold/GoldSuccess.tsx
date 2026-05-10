@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import { Download } from "lucide-react";
+import { useEffect, useState } from "react";
+import { fetchGoldInvoice } from "@/lib/api/safegold";
 
 type Props = {
   amount?: string;
@@ -14,11 +16,82 @@ export default function GoldSuccess({
   txId,
   gold,
 }: Props) {
+  const [finalAmount, setFinalAmount] =
+    useState(amount || "");
+
+  const [finalGold, setFinalGold] =
+    useState(gold || "");
+
+  useEffect(() => {
+    /*
+     * FALLBACK FROM SESSION STORAGE
+     */
+
+    if (amount && gold) return;
+
+    const stored =
+      sessionStorage.getItem(
+        "gold_purchase_meta",
+      );
+
+    if (!stored) return;
+
+    const parsed = JSON.parse(stored);
+
+    setFinalAmount(
+      parsed?.amount || "",
+    );
+
+    setFinalGold(
+      parsed?.goldAmount || "",
+    );
+  }, [amount, gold]);
+
+  const handleDownloadInvoice =
+    async () => {
+      try {
+        if (!txId) return;
+
+        const response =
+          await fetchGoldInvoice(
+            Number(txId),
+          );
+
+        const invoiceUrl =
+          response?.invoice_url ||
+          response?.data?.invoice_url;
+
+        if (!invoiceUrl) {
+          alert(
+            "Invoice not available",
+          );
+
+          return;
+        }
+
+        window.open(
+          invoiceUrl,
+          "_blank",
+        );
+      } catch (error) {
+        console.log(error);
+
+        alert(
+          "Failed to download invoice",
+        );
+      }
+    };
+
   return (
     <div className="min-h-screen bg-white flex flex-col items-center px-4 pt-16 pb-10 max-w-[430px] mx-auto">
       {/* Success Icon */}
       <div className="w-[124px] h-[124px] rounded-full bg-[#22C55E] flex items-center justify-center shadow-lg">
-        <svg width="52" height="52" viewBox="0 0 24 24" fill="none">
+        <svg
+          width="52"
+          height="52"
+          viewBox="0 0 24 24"
+          fill="none"
+        >
           <path
             d="M5 13L10 18L19 7"
             stroke="white"
@@ -46,7 +119,7 @@ export default function GoldSuccess({
             </p>
 
             <h2 className="mt-1 text-[28px] font-bold text-[#111827]">
-              {gold} g
+              {finalGold || "0"} g
             </h2>
 
             <p className="mt-1 text-[14px] font-semibold tracking-wide text-[#9CA3AF]">
@@ -73,7 +146,14 @@ export default function GoldSuccess({
           </span>
 
           <span className="text-[22px] font-semibold text-[#111827]">
-            ₹{amount}
+            ₹
+            {finalAmount
+              ? Number(
+                finalAmount,
+              ).toLocaleString(
+                "en-IN",
+              )
+              : "0"}
           </span>
         </div>
 
@@ -94,7 +174,9 @@ export default function GoldSuccess({
         Continue
       </button>
 
-      <button className="flex items-center gap-2 mt-7 text-[16px] font-medium text-black">
+      <button
+        onClick={handleDownloadInvoice}
+        className="flex items-center gap-2 mt-7 text-[16px] font-medium text-black">
         Download Invoice
         <Download size={20} />
       </button>
