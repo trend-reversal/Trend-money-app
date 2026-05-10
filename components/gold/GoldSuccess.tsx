@@ -2,8 +2,14 @@
 
 import Image from "next/image";
 import { Download } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 export default function GoldSuccess() {
+  const searchParams = useSearchParams();
+
+  const amount = searchParams.get("amount");
+  const txId = searchParams.get("txId");
+  const gold = searchParams.get("gold");
   return (
     <div className="min-h-screen bg-white flex flex-col items-center px-4 pt-16 pb-10 max-w-[430px] mx-auto">
       {/* Success Icon */}
@@ -36,7 +42,7 @@ export default function GoldSuccess() {
             <p className="text-[15px] text-[#9CA3AF]">You bought</p>
 
             <h2 className="mt-1 text-[28px] font-bold text-[#111827]">
-              0.1602 g
+              {gold} g
             </h2>
 
             <p className="mt-1 text-[14px] font-semibold tracking-wide text-[#9CA3AF]">
@@ -62,7 +68,7 @@ export default function GoldSuccess() {
           <span className="text-[16px] text-[#9CA3AF]">Amount Paid</span>
 
           <span className="text-[22px] font-semibold text-[#111827]">
-            ₹2000
+            ₹{amount}
           </span>
         </div>
 
@@ -72,7 +78,7 @@ export default function GoldSuccess() {
           <span className="text-[16px] text-[#9CA3AF]">Transaction ID</span>
 
           <span className="text-[18px] font-semibold text-[#111827]">
-            75212457896
+            {txId}
           </span>
         </div>
       </div>

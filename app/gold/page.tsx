@@ -92,11 +92,6 @@ export default function GoldPage() {
 
       setTxId(generatedTxId);
 
-      /*
-       * STEP 2
-       * CREATE PAYMENT
-       */
-
       createPaymentMutation(
         {
           amount: Number(verifyResponse.buy_price),
@@ -157,9 +152,6 @@ export default function GoldPage() {
     txId: number,
   ) => {
     try {
-      /*
-       * PREVENT DUPLICATE POLLING
-       */
 
       if (isPolling) return;
 
@@ -169,10 +161,6 @@ export default function GoldPage() {
 
       const poll = setInterval(async () => {
         attempts++;
-
-        /*
-         * STOP AFTER 2 MIN
-         */
 
         if (attempts > 40) {
           clearInterval(poll);
@@ -247,7 +235,7 @@ export default function GoldPage() {
 
             if (status === 1) {
               router.push(
-                "/gold/success",
+                `/gold/success?amount=${amount}&txId=${txId}&gold=${buyStatus.gold_amount}`
               );
 
               return;
