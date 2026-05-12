@@ -6,6 +6,7 @@ export interface CreatePaymentPayload {
     safegold_tx_id: number;
     productType: string;
     deviceName: string;
+    isNativeApp: boolean;
 }
 
 export const createPayment = async (
@@ -18,4 +19,17 @@ export const createPayment = async (
         );
 
     return response.data;
+};
+
+export const checkPaymentStatus = async (orderId: string) => {
+    const { data } = await axiosInstance.get(
+        "/phonepe/check-status",
+        {
+            params: {
+                orderId,
+            },
+        },
+    );
+
+    return data;
 };
