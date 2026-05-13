@@ -54,41 +54,40 @@ export default function GoldSuccess({
     fetchDetails();
   }, [txId]);
 
-  const handleDownloadInvoice =
-    async () => {
-      try {
-        if (!txId) return;
+  const handleDownloadInvoice = async () => {
+    try {
+      if (!txId) return;
 
-        const response =
-          await fetchGoldInvoice(
-            Number(txId),
-          );
+      const response = await fetchGoldInvoice(Number(txId));
 
-        const invoiceUrl =
-          response?.link ||
-          response?.data?.link ||
-          details?.invoiceUrl;
+      const invoiceUrl =
+        response?.link ||
+        response?.data?.link ||
+        details?.invoiceUrl;
 
-        if (!invoiceUrl) {
-          alert(
-            "Invoice not available",
-          );
-
-          return;
-        }
-
-        window.open(
-          invoiceUrl,
-          "_blank",
-        );
-      } catch (error) {
-        console.log(error);
-
-        alert(
-          "Failed to download invoice",
-        );
+      if (!invoiceUrl) {
+        alert("Invoice not available");
+        return;
       }
-    };
+
+      // Send to React Native to open in browser
+      if (typeof window !== 'undefined' && window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage(
+          JSON.stringify({
+            type: 'OPEN_EXTERNAL_URL',
+            url: invoiceUrl,
+          })
+        );
+      } else {
+        // PWA fallback
+        window.open(invoiceUrl, '_blank');
+      }
+
+    } catch (error) {
+      console.log(error);
+      alert("Failed to download invoice");
+    }
+  };
 
   if (loading) {
     return (

@@ -8,6 +8,9 @@ import { useGoldBreakdown } from "@/hooks/queries/useGoldBreakdown";
 import BottomSheet from "@/components/common/BottomSheet";
 import { verifyGoldPurchase } from "@/lib/api/safegold";
 import { createSipIntent } from "@/lib/api/payments";
+import GoldPriceChart from "@/components/gold/GoldPriceChart";
+import { useGoldHistoricalPrice } from "@/hooks/queries/useGoldHistoricalPrice";
+
 export default function GoldPage() {
 
   const [showAmountBox, setShowAmountBox] = useState(false);
@@ -18,6 +21,9 @@ export default function GoldPage() {
   const [investmentType, setInvestmentType] = useState<
     "ONETIME" | "DAILY" | "WEEKLY" | "MONTHLY"
   >("ONETIME");
+  const [selectedRange, setSelectedRange] = useState<
+    "6M" | "1Y" | "3Y" | "5Y"
+  >("3Y");
 
   const [showSipAppsSheet, setShowSipAppsSheet] =
     useState(false);
@@ -53,6 +59,55 @@ export default function GoldPage() {
       icon: "/UPI_logos/tr_cred_logo.png",
     },
   ];
+
+  const formatApiDate = (date: Date) => {
+    const year = String(date.getFullYear()).slice(2);
+    const month = String(
+      date.getMonth() + 1,
+    ).padStart(2, "0");
+    const day = String(date.getDate()).padStart(
+      2,
+      "0",
+    );
+
+    return `${year}-${month}-${day}`;
+  };
+
+  const getFromDate = () => {
+    const today = new Date();
+    const from = new Date();
+
+    switch (selectedRange) {
+      case "6M":
+        from.setMonth(today.getMonth() - 6);
+        break;
+
+      case "1Y":
+        from.setFullYear(today.getFullYear() - 1);
+        break;
+
+      case "3Y":
+        from.setFullYear(today.getFullYear() - 3);
+        break;
+
+      case "5Y":
+        from.setFullYear(today.getFullYear() - 5);
+        break;
+    }
+
+    return formatApiDate(from);
+  };
+
+  const todayDate = formatApiDate(new Date());
+
+  const {
+    data: historicalData,
+    isLoading: isChartLoading,
+  } = useGoldHistoricalPrice({
+    from_date: getFromDate(),
+    to_date: todayDate,
+    type: "m",
+  });
 
   const handleStartInvestment = async () => {
     try {
@@ -151,10 +206,14 @@ export default function GoldPage() {
 
       const verifyResponse =
         await verifyGoldPurchase({
-          rate_id: livePrice?.rate_id,
+          rate_id:
+            livePrice?.rate_id,
+
           gold_amount:
             breakdown?.gold_amount,
-          buy_price: Number(amount),
+
+          buy_price:
+            Number(amount),
         });
 
       const txId =
@@ -166,26 +225,71 @@ export default function GoldPage() {
       }
 
       /*
+       * ANDROID PACKAGE MAP
+       */
+
+      const PACKAGE_MAP: Record<
+        string,
+        string
+      > = {
+        PHONEPE:
+          'com.phonepe.app',
+
+        GPAY:
+          'com.google.android.apps.nbu.paisa.user',
+
+        PAYTM:
+          'net.one97.paytm',
+
+        CRED:
+          'com.dreamplug.androidapp',
+      };
+
+      const packageName =
+        PACKAGE_MAP[selectedApp];
+
+      /*
        * STEP 2
        * CREATE SIP INTENT
        */
 
-      const isIOS =
-        /iPhone|iPad|iPod/i.test(
-          navigator.userAgent,
-        );
+      const payload = {
+        frequency:
+          investmentType,
+
+        amount:
+          Number(amount),
+
+        deviceOS:
+          'ANDROID',
+
+        targetApp:
+          packageName,
+
+        safegoldTxId:
+          txId,
+
+        productType:
+          'GOLD',
+      };
+
+      alert(
+        JSON.stringify(payload),
+      );
+
+      console.log(
+        'FINAL PAYLOAD',
+        payload
+      );
 
       const response =
-        await createSipIntent({
-          frequency: investmentType,
-          amount: Number(amount),
-          deviceOS: isIOS
-            ? "IOS"
-            : "ANDROID",
-          targetApp: selectedApp,
-          safegoldTxId: txId,
-          productType: "GOLD",
-        });
+        await createSipIntent(
+          payload
+        );
+
+      alert(
+        JSON.stringify(response),
+      );
 
       const intentUrl =
         response?.intentUrl;
@@ -207,20 +311,15 @@ export default function GoldPage() {
        * MOBILE APP
        */
 
-      if (
-        typeof window !==
-        "undefined" &&
-        window.ReactNativeWebView
-      ) {
+      if (typeof window !== 'undefined' && window.ReactNativeWebView) {
         window.ReactNativeWebView.postMessage(
           JSON.stringify({
-            type: "OPEN_UPI_INTENT",
+            type: 'OPEN_UPI_INTENT',
             url: intentUrl,
-            orderId:
-              merchantOrderId,
-            txId,
-            investmentType,
-          }),
+            targetApp: PACKAGE_MAP[selectedApp], // pass the package name
+            orderId: merchantOrderId,   // ADD THIS
+            txId: txId,
+          })
         );
       } else {
         /*
@@ -228,12 +327,12 @@ export default function GoldPage() {
          */
 
         localStorage.setItem(
-          "sip_order_id",
+          'sip_order_id',
           merchantOrderId,
         );
 
         localStorage.setItem(
-          "sip_tx_id",
+          'sip_tx_id',
           String(txId),
         );
 
@@ -557,62 +656,47 @@ export default function GoldPage() {
           </p>
 
           {/* Tabs */}
+          {/* Tabs */}
           <div className="flex justify-between mt-5">
             {["6M", "1Y", "3Y", "5Y"].map((tab) => (
               <button
                 key={tab}
+                onClick={() =>
+                  setSelectedRange(
+                    tab as
+                    | "6M"
+                    | "1Y"
+                    | "3Y"
+                    | "5Y",
+                  )
+                }
                 className={`
-            w-[68px]
-            h-[48px]
-            rounded-[12px]
-            border
-            text-[18px]
-            font-medium
-            transition-all
-            ${tab === "3Y"
+        w-[68px]
+        h-[48px]
+        rounded-[12px]
+        border
+        text-[18px]
+        font-medium
+        transition-all
+        ${selectedRange === tab
                     ? "bg-[#D4AF37] border-[#D4AF37] text-white"
                     : "bg-white border-[#E5E7EB] text-[#222222]"
                   }
-          `}
+      `}
               >
                 {tab}
               </button>
             ))}
           </div>
-
-          {/* Chart Area */}
-          <div className="relative mt-6 h-[240px] bg-[#F9F9FB] rounded-lg overflow-hidden">
-            {/* Graph */}
-            <div className="absolute inset-0">
-              <svg viewBox="0 0 300 200" className="w-full h-full">
-                {/* Line */}
-                <path
-                  d="M0 180 C50 170, 80 150, 110 130 C140 110, 170 120, 200 90 C230 60, 260 80, 300 70"
-                  fill="none"
-                  stroke="#D4AF37"
-                  strokeWidth="2"
-                />
-
-                {/* Fill */}
-                <path
-                  d="M0 180 C50 170, 80 150, 110 130 C140 110, 170 120, 200 90 C230 60, 260 80, 300 70 L300 200 L0 200 Z"
-                  fill="#D4AF37"
-                  opacity="0.12"
-                />
-              </svg>
-            </div>
-
-            {/* Highlight Dot */}
-            <div className="absolute right-[58px] top-[88px] w-[12px] h-[12px] rounded-full bg-[#D4AF37]" />
-
-            {/* Tooltip */}
-            <div className="absolute right-[68px] top-[36px] bg-white px-3 py-2 rounded-[10px] border border-[#F3F3F3] shadow-sm">
-              <p className="text-[10px] text-[#9CA3AF] text-center">MAY'25</p>
-
-              <p className="text-[13px] font-semibold text-[#D4AF37] text-center">
-                ₹1,305.49/g
-              </p>
-            </div>
+          {/* Chart */}
+          <div className="mt-6">
+            {isChartLoading ? (
+              <div className="h-[360px] rounded-[20px] bg-[#F3F4F6] animate-pulse" />
+            ) : (
+              <GoldPriceChart
+                data={historicalData?.data || []}
+              />
+            )}
           </div>
         </div>
       </div>

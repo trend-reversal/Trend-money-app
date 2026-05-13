@@ -99,3 +99,18 @@ export const getGoldTransactionDetails =
 
         return data;
     };
+
+export const getHistoricalGoldPrice = async (params: {
+    from_date: string;
+    to_date: string;
+    type?: string;
+}) => {
+    const { data } = await axiosInstance.get(
+        "/metals/historical-price",
+        {
+            params,
+        },
+    );
+
+    return data;
+};
