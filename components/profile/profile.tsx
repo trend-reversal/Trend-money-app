@@ -90,7 +90,10 @@ export default function ProfilePage() {
 
         <p className="mt-1 text-[12px] text-[#606060]">+91 7011281257</p>
 
-        <button className="mt-4 w-[118px] h-[34px] rounded-[6px] bg-black text-white text-[12px] font-medium active:scale-[0.98] transition">
+        <button
+          onClick={() => router.push("/profile/details")}
+          className="mt-4 w-[118px] h-[34px] rounded-[6px] bg-black text-white text-[12px] font-medium active:scale-[0.98] transition"
+        >
           Edit Profile
         </button>
       </div>
