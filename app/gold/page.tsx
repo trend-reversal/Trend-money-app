@@ -7,6 +7,7 @@ import { useGoldPrice } from "@/hooks/queries/useGoldPrice";
 import { useGoldBreakdown } from "@/hooks/queries/useGoldBreakdown";
 import BottomSheet from "@/components/common/BottomSheet";
 import { verifyGoldPurchase } from "@/lib/api/safegold";
+import { createSipIntent } from "@/lib/api/payments";
 export default function GoldPage() {
 
   const [showAmountBox, setShowAmountBox] = useState(false);
@@ -14,6 +15,12 @@ export default function GoldPage() {
   const [selectedChip, setSelectedChip] = useState<string | null>(null);
   const [showBreakdown, setShowBreakdown] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [investmentType, setInvestmentType] = useState<
+    "ONETIME" | "DAILY" | "WEEKLY" | "MONTHLY"
+  >("ONETIME");
+
+  const [showSipAppsSheet, setShowSipAppsSheet] =
+    useState(false);
 
   const { data: livePrice } = useGoldPrice();
   const { mutate: createPaymentMutation, isPending: isCreatingPayment } =
@@ -24,9 +31,41 @@ export default function GoldPage() {
     livePrice?.current_price,
   );
 
+  const UPI_APPS = [
+    {
+      id: "PHONEPE",
+      label: "PhonePe",
+      icon: "/UPI_logos/tr_phonepe.png",
+    },
+    {
+      id: "GPAY",
+      label: "Google Pay",
+      icon: "/UPI_logos/tr_googlepay.png",
+    },
+    {
+      id: "PAYTM",
+      label: "Paytm",
+      icon: "/UPI_logos/tr_paytm.png",
+    },
+    {
+      id: "CRED",
+      label: "CRED",
+      icon: "/UPI_logos/tr_cred_logo.png",
+    },
+  ];
+
   const handleStartInvestment = async () => {
     try {
       if (!amount) return;
+
+      /*
+       * For SIP, we directly show UPI apps for intent creation
+       */
+
+      if (investmentType !== "ONETIME") {
+        setShowSipAppsSheet(true);
+        return;
+      }
 
       setIsProcessing(true);
 
@@ -99,6 +138,115 @@ export default function GoldPage() {
     }
   };
 
+  const handleSipSetup = async (
+    selectedApp: string,
+  ) => {
+    try {
+      setIsProcessing(true);
+
+      /*
+       * STEP 1
+       * BUY VERIFY
+       */
+
+      const verifyResponse =
+        await verifyGoldPurchase({
+          rate_id: livePrice?.rate_id,
+          gold_amount:
+            breakdown?.gold_amount,
+          buy_price: Number(amount),
+        });
+
+      const txId =
+        verifyResponse?.tx_id;
+
+      if (!txId) {
+        setIsProcessing(false);
+        return;
+      }
+
+      /*
+       * STEP 2
+       * CREATE SIP INTENT
+       */
+
+      const isIOS =
+        /iPhone|iPad|iPod/i.test(
+          navigator.userAgent,
+        );
+
+      const response =
+        await createSipIntent({
+          frequency: investmentType,
+          amount: Number(amount),
+          deviceOS: isIOS
+            ? "IOS"
+            : "ANDROID",
+          targetApp: selectedApp,
+          safegoldTxId: txId,
+          productType: "GOLD",
+        });
+
+      const intentUrl =
+        response?.intentUrl;
+
+      const merchantOrderId =
+        response?.merchantOrderId;
+
+      if (
+        !intentUrl ||
+        !merchantOrderId
+      ) {
+        setIsProcessing(false);
+        return;
+      }
+
+      setShowSipAppsSheet(false);
+
+      /*
+       * MOBILE APP
+       */
+
+      if (
+        typeof window !==
+        "undefined" &&
+        window.ReactNativeWebView
+      ) {
+        window.ReactNativeWebView.postMessage(
+          JSON.stringify({
+            type: "OPEN_UPI_INTENT",
+            url: intentUrl,
+            orderId:
+              merchantOrderId,
+            txId,
+            investmentType,
+          }),
+        );
+      } else {
+        /*
+         * PWA WEB
+         */
+
+        localStorage.setItem(
+          "sip_order_id",
+          merchantOrderId,
+        );
+
+        localStorage.setItem(
+          "sip_tx_id",
+          String(txId),
+        );
+
+        window.location.href =
+          intentUrl;
+      }
+    } catch (err) {
+      console.log(err);
+
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="bg-white min-h-screen pb-6">
       <div className="flex items-center justify-between px-6 pt-12 pb-4 bg-white">
@@ -148,13 +296,13 @@ export default function GoldPage() {
       </div>
 
       {/*  Hero Card */}
-      <div className="mx-4 mt-4 relative overflow-hidden rounded-[18px] bg-[#FAF8F5] border border-[#ECECEC]">
+      <div className="mx-4 mt-4 relative overflow-hidden rounded-[18px] bg-[#FAF8F5] border border-[#ECECEC] pointer-events-none">
         {/* Background Image */}
         <Image
           src="/images/gold/gold.png"
           alt="gold-bg"
           fill
-          className="object-cover"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
           priority
         />
 
@@ -208,7 +356,7 @@ export default function GoldPage() {
         <div className="w-2 h-2 bg-gray-400 rounded-full" />
       </div>
 
-      <div className="px-4 mt-6">
+      <div className="px-4 mt-6 relative z-50">
         <h3 className="text-sm text-[#B5B7B9] uppercase mb-3">Quick Actions</h3>
 
         <div className="grid grid-cols-2 gap-3">
@@ -233,27 +381,32 @@ export default function GoldPage() {
             <button
               key={i}
               onClick={() => {
-                /*
-                 * RESET
-                 */
-
                 setAmount("");
                 setSelectedChip(null);
                 setShowBreakdown(false);
+                console.log("Selected Investment Type:", item.title);
+                const typeMap: Record<
+                  string,
+                  "ONETIME" | "DAILY" | "WEEKLY" | "MONTHLY"
+                > = {
+                  "One-Time Investment":
+                    "ONETIME",
+                  "Daily SIP": "DAILY",
+                  "Weekly SIP": "WEEKLY",
+                  "Monthly SIP":
+                    "MONTHLY",
+                };
 
-                /*
-                 * ONLY ONE TIME INVESTMENT
-                 * SHOULD OPEN PAYMENT FLOW
-                 */
+                setInvestmentType(
+                  typeMap[item.title],
+                );
 
-                if (
-                  item.title ===
-                  "One-Time Investment"
-                ) {
-                  setShowAmountBox(true);
-                } else {
-                  setShowAmountBox(false);
-                }
+                console.log(
+                  "TYPE:",
+                  typeMap[item.title],
+                );
+
+                setShowAmountBox(true);
               }}
               className="
           relative
@@ -368,7 +521,9 @@ export default function GoldPage() {
           >
             {isProcessing
               ? "Processing..."
-              : "Start Investing"}
+              : investmentType === "ONETIME"
+                ? "Start Investing"
+                : `Setup ${investmentType} SIP`}
           </button>
         </div>
       )}
@@ -743,6 +898,51 @@ export default function GoldPage() {
                 All investments are secure
               </span>
             </div>
+          </div>
+        </div>
+      </BottomSheet>
+
+      <BottomSheet
+        open={showSipAppsSheet}
+        onClose={() =>
+          setShowSipAppsSheet(false)
+        }
+      >
+        <div className="px-4 pb-8">
+          <h2 className="text-[20px] font-semibold text-black">
+            Select UPI App
+          </h2>
+
+          <div className="grid grid-cols-2 gap-4 mt-6">
+            {UPI_APPS.map((app) => (
+              <button
+                key={app.id}
+                onClick={() =>
+                  handleSipSetup(app.id)
+                }
+                className="
+            h-[110px]
+            rounded-2xl
+            border
+            border-[#ECECEC]
+            flex
+            flex-col
+            items-center
+            justify-center
+            active:scale-[0.98]
+            transition
+          "
+              >
+                <img
+                  src={app.icon}
+                  className="w-12 h-12 object-contain"
+                />
+
+                <p className="mt-3 text-sm font-medium text-black">
+                  {app.label}
+                </p>
+              </button>
+            ))}
           </div>
         </div>
       </BottomSheet>
