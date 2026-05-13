@@ -278,23 +278,10 @@ export default function GoldPage() {
           'GOLD',
       };
 
-      alert(
-        JSON.stringify(payload),
-      );
-
-      console.log(
-        'FINAL PAYLOAD',
-        payload
-      );
-
       const response =
         await createSipIntent(
           payload
         );
-
-      alert(
-        JSON.stringify(response),
-      );
 
       const intentUrl =
         response?.intentUrl;
