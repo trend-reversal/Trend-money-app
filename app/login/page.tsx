@@ -76,8 +76,16 @@ export default function LoginPage() {
   const [timer, setTimer] = useState(25);
   const [isBlocked, setIsBlocked] = useState(false);
 
-  const { mutate: sendOtpMutation, isPending: isSendingOtp } =
-    useSendOtp();
+  const {
+    mutate: sendOtpMutation,
+    isPending: isSendingOtp,
+    error: sendOtpError,
+  } = useSendOtp();
+
+  const sendOtpErrorMessage =
+    // @ts-ignore
+    sendOtpError?.response?.data?.message ||
+    "Failed to send OTP";
 
   const {
     mutate: signInMutation,
@@ -192,7 +200,13 @@ export default function LoginPage() {
                     className={`flex-1 pl-3 outline-none ${phone ? "text-black" : "text-gray-400"
                       }`}
                   />
+
                 </div>
+                {sendOtpError && (
+                  <p className="text-red-500 text-sm mt-3 leading-5">
+                    {sendOtpErrorMessage}
+                  </p>
+                )}
               </div>
             </>
           ) : (

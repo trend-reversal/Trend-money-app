@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useDeleteUser } from "@/hooks/mutations/useDeleteUser";
 
 const reasons = [
   "I found a better alternative",
@@ -17,20 +18,37 @@ export default function DeleteAccountReasonPage() {
   const [selectedReason, setSelectedReason] = useState("");
   const [comment, setComment] = useState("");
   const [showPopup, setShowPopup] = useState(false);
+  const { mutate: deleteAccount, isPending } =
+    useDeleteUser();
 
   const handleDeleteAccount = () => {
     if (!selectedReason) {
       alert("Please select a reason");
       return;
     }
-    console.log("Delete reason:", selectedReason);
-    console.log("Comment:", comment);
-    setShowPopup(true);
+
+    const payload: {
+      reason: string;
+      others?: string;
+    } = {
+      reason: selectedReason,
+    };
+
+    if (comment.trim()) {
+      payload.others = comment.trim();
+    }
+
+    deleteAccount(payload, {
+      onSuccess: () => {
+        setShowPopup(true);
+      },
+    });
   };
 
   const handlePopupClose = () => {
     setShowPopup(false);
-    router.push("/");
+
+    window.location.href = "/";
   };
 
   return (
@@ -100,16 +118,14 @@ export default function DeleteAccountReasonPage() {
             <button
               key={reason}
               onClick={() => setSelectedReason(reason)}
-              className={`w-full h-[42px] rounded-[2px] border px-3 flex items-center gap-3 bg-white transition-all active:scale-[0.99] ${
-                selectedReason === reason ? "border-black" : "border-[#E5E7EB]"
-              }`}
+              className={`w-full h-[42px] rounded-[2px] border px-3 flex items-center gap-3 bg-white transition-all active:scale-[0.99] ${selectedReason === reason ? "border-black" : "border-[#E5E7EB]"
+                }`}
             >
               <span
-                className={`w-[14px] h-[14px] rounded-full border-[1.5px] flex items-center justify-center flex-shrink-0 ${
-                  selectedReason === reason
-                    ? "border-black"
-                    : "border-[#9CA3AF]"
-                }`}
+                className={`w-[14px] h-[14px] rounded-full border-[1.5px] flex items-center justify-center flex-shrink-0 ${selectedReason === reason
+                  ? "border-black"
+                  : "border-[#9CA3AF]"
+                  }`}
               >
                 {selectedReason === reason && (
                   <span className="w-[7px] h-[7px] rounded-full bg-black" />
@@ -136,9 +152,10 @@ export default function DeleteAccountReasonPage() {
       <div className="absolute bottom-8 left-4 right-4">
         <button
           onClick={handleDeleteAccount}
-          className="w-full h-[54px] rounded-[2px] bg-black text-white text-[14px] font-medium active:scale-[0.98] transition"
+          disabled={isPending}
+          className="w-full h-[54px] rounded-[2px] bg-black text-white text-[14px] font-medium active:scale-[0.98] transition disabled:opacity-60"
         >
-          Delete Account
+          {isPending ? "Deleting..." : "Delete Account"}
         </button>
 
         <button

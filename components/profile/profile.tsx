@@ -9,9 +9,38 @@ import {
   LogOut,
   ChevronRight,
 } from "lucide-react";
+import {
+  calculateProfileCompletion,
+  getCircleProgress,
+} from "@/utils/profileCompletion";
+
+import { useGetUser } from "@/hooks/queries/useGetUser";
+import { useLogout } from "@/hooks/mutations/useLogout";
 
 export default function ProfilePage() {
   const router = useRouter();
+  const { mutate: logoutUser, isPending: isLoggingOut } =
+    useLogout();
+
+  const { data: user, isLoading, error } = useGetUser();
+  const userData = user?.data;
+  const formattedName =
+    userData?.name
+      ?.toLowerCase()
+      ?.split(" ")
+      ?.filter(Boolean)
+      ?.map(
+        (word: string) => word.charAt(0).toUpperCase() + word.slice(1)
+      )
+      ?.join(" ") || "User";
+
+  const { percentage } =
+    calculateProfileCompletion(userData);
+
+  const radius = 55;
+
+  const { circumference, strokeDashoffset } =
+    getCircleProgress(percentage, radius);
 
   const menuItems = [
     {
@@ -30,6 +59,35 @@ export default function ProfilePage() {
       route: "/profile/share-feedback",
     },
   ];
+
+  // Loading State
+  if (isLoading) {
+    return (
+      <div className="min-h-[100dvh] flex items-center justify-center">
+        <p className="text-sm text-gray-500">Loading profile...</p>
+      </div>
+    );
+  }
+
+  // Error State
+  if (error) {
+    return (
+      <div className="min-h-[100dvh] flex items-center justify-center">
+        <p className="text-sm text-red-500">
+          Failed to load profile data
+        </p>
+      </div>
+    );
+  }
+
+  // Fallback initials
+  const initials =
+    userData?.name
+      ?.split(" ")
+      ?.map((word: string) => word[0])
+      ?.join("")
+      ?.slice(0, 2)
+      ?.toUpperCase() || "U";
 
   return (
     <div className="relative min-h-[100dvh] w-full max-w-[430px] mx-auto bg-white overflow-hidden">
@@ -71,26 +129,31 @@ export default function ProfilePage() {
             <circle
               cx="60"
               cy="60"
-              r="55"
+              r={radius}
               stroke="#16A34A"
               strokeWidth="5"
               fill="none"
-              strokeDasharray="345"
-              strokeDashoffset="110"
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
               strokeLinecap="round"
+              className="transition-all duration-500"
             />
           </svg>
 
           <div className="absolute inset-[14px] rounded-full bg-black flex items-center justify-center">
-            <span className="text-white text-[40px] font-medium">AD</span>
+            <span className="text-white text-[40px] font-medium">
+              {initials}
+            </span>
           </div>
         </div>
 
         <h2 className="mt-5 text-[18px] font-semibold text-black">
-          Adwin Dorman
+          {formattedName}
         </h2>
 
-        <p className="mt-1 text-[12px] text-[#606060]">+91 7011281257</p>
+        <p className="mt-1 text-[12px] text-[#606060]">
+          {userData?.phone || "No phone number"}
+        </p>
 
         <button
           onClick={() => router.push("/profile/details")}
@@ -139,11 +202,15 @@ export default function ProfilePage() {
         </button>
 
         {/* Logout */}
-        <button className="w-full flex items-center gap-4 py-4">
+        <button
+          onClick={() => logoutUser()}
+          disabled={isLoggingOut}
+          className="w-full flex items-center gap-4 py-4"
+        >
           <LogOut size={18} color="#FF4D4F" />
 
           <span className="text-[14px] text-[#FF4D4F] font-medium">
-            Log Out
+            {isLoggingOut ? "Logging Out..." : "Log Out"}
           </span>
         </button>
       </div>

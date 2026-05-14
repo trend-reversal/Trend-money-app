@@ -1,10 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { calculateProfileCompletion } from "@/utils/profileCompletion";
 
 export default function HeaderHero() {
+
   const assets = [
     {
       name: "Gold",
@@ -48,11 +50,39 @@ export default function HeaderHero() {
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
   const [isSwiping, setIsSwiping] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
   const CENTER_CARD = 200;
   const SIDE_CARD = 148;
   const GAP = 12;
   const STEP = CENTER_CARD / 2 + GAP + SIDE_CARD / 2; // 186px
+
+  const profileFields = [
+    user?.firstName,
+    user?.lastName,
+    user?.email,
+    user?.pan_number,
+    user?.dateOfBirth,
+    user?.account_number,
+    user?.ifsc_code,
+    user?.nominee?.firstName,
+    user?.nominee?.lastName,
+    user?.nominee?.relation,
+    user?.nominee?.phone,
+  ];
+
+  const {
+    percentage,
+    circumference,
+    strokeDashoffset,
+  } = calculateProfileCompletion(profileFields);
 
   const slide = (dir: "next" | "prev") => {
     if (animating) return;
@@ -111,7 +141,14 @@ export default function HeaderHero() {
       {/* Header */}
       <div className="flex justify-between items-center text-white px-6 mb-8">
         <div>
-          <h1 className="text-[24px] italic">Hi, Investor!</h1>
+          <h1 className="text-[24px] italic">
+            Hi,{" "}
+            {user?.firstName?.trim()
+              ? user.firstName.charAt(0).toUpperCase() +
+              user.firstName.slice(1).toLowerCase()
+              : "Investor"}
+            !
+          </h1>
           <p className="text-[13px] mt-[2px]">
             Let's Build Your Financial Future
           </p>
@@ -140,9 +177,10 @@ export default function HeaderHero() {
               fill="none"
               stroke="#22C55E"
               strokeWidth="3"
-              strokeDasharray="80"
-              strokeDashoffset="33"
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
               strokeLinecap="round"
+              className="transition-all duration-500"
             />
           </svg>
           <div className="absolute inset-[7px] bg-[#E5E5E5] rounded-full flex items-center justify-center">
