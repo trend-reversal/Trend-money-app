@@ -24,6 +24,7 @@ export default function SilverPage() {
         safegold_tx_id: 2006745356,
         productType: "SILVER",
         deviceName: "mobile",
+        isNativeApp: true,
       },
       {
         onSuccess: (response) => {
@@ -268,10 +269,9 @@ export default function SilverPage() {
                     setShowBreakdown(false);
                   }}
                   className={`px-4 h-[34px] rounded-full border text-[15px] text-[#7A7A7A] whitespace-nowrap transition-all
-                    ${
-                      selectedChip === item
-                        ? "border-[#69A1E1] bg-[#EEF4FC] text-[#185FA5] font-semibold"
-                        : "border-[#E5E5E5] bg-[#FAFAFA]"
+                    ${selectedChip === item
+                      ? "border-[#69A1E1] bg-[#EEF4FC] text-[#185FA5] font-semibold"
+                      : "border-[#E5E5E5] bg-[#FAFAFA]"
                     }`}
                 >
                   {item}
@@ -447,11 +447,10 @@ export default function SilverPage() {
             text-[18px]
             font-medium
             transition-all
-            ${
-              tab === "3Y"
-                ? "bg-[#69A1E1] border-[#69A1E1 ] text-white"
-                : "bg-white border-[#E5E7EB] text-[#222222]"
-            }
+            ${tab === "3Y"
+                    ? "bg-[#69A1E1] border-[#69A1E1 ] text-white"
+                    : "bg-white border-[#E5E7EB] text-[#222222]"
+                  }
           `}
               >
                 {tab}
