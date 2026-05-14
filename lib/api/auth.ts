@@ -9,6 +9,10 @@ export interface SignInPayload {
     otp: string;
 }
 
+export interface RefreshTokenPayload {
+    refresh_token: string;
+}
+
 export const sendOtp = async (payload: SendOtpPayload) => {
     const response = await axiosInstance.post("/auth/send-otp", payload);
 
@@ -20,3 +24,16 @@ export const signIn = async (payload: SignInPayload) => {
 
     return response.data;
 };
+
+export const refreshToken =
+    async (
+        payload: RefreshTokenPayload
+    ) => {
+        const response =
+            await axiosInstance.post(
+                "/auth/refresh-token",
+                payload
+            );
+
+        return response.data;
+    };

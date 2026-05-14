@@ -39,6 +39,22 @@ export const useSignIn = () => {
                 );
             }
 
+            if (
+                typeof window !== "undefined" &&
+                window.ReactNativeWebView
+            ) {
+                window.ReactNativeWebView.postMessage(
+                    JSON.stringify({
+                        type: "SAVE_AUTH",
+                        accessToken:
+                            tokens.access_token,
+                        refreshToken:
+                            tokens.refresh_token,
+                        user,
+                    }),
+                );
+            }
+
             window.location.href = "/home";
         },
     });

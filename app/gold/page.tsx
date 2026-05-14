@@ -6,7 +6,16 @@ import { useCreatePayment } from "@/hooks/mutations/useCreatePayment";
 import { useGoldPrice } from "@/hooks/queries/useGoldPrice";
 import { useGoldBreakdown } from "@/hooks/queries/useGoldBreakdown";
 import BottomSheet from "@/components/common/BottomSheet";
-import { verifyGoldPurchase } from "@/lib/api/safegold";
+import { getGoldBreakdown, verifyGoldPurchase } from "@/lib/api/safegold";
+import { createSipIntent } from "@/lib/api/payments";
+import GoldPriceChart from "@/components/gold/GoldPriceChart";
+import { useGoldHistoricalPrice } from "@/hooks/queries/useGoldHistoricalPrice";
+import QuickActionCard from "@/components/gold/QuickActionCard";
+import InstantSipCard from "@/components/gold/InstantSipCard";
+import CertificateCarousel from "@/components/gold/CertificateCarousel";
+import FaqSection from "@/components/gold/FaqSection";
+import GoldFeatures from "@/components/gold/GoldFeatures";
+
 export default function GoldPage() {
 
   const [showAmountBox, setShowAmountBox] = useState(false);
@@ -14,6 +23,15 @@ export default function GoldPage() {
   const [selectedChip, setSelectedChip] = useState<string | null>(null);
   const [showBreakdown, setShowBreakdown] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [investmentType, setInvestmentType] = useState<
+    "ONETIME" | "DAILY" | "WEEKLY" | "MONTHLY"
+  >("ONETIME");
+  const [selectedRange, setSelectedRange] = useState<
+    "6M" | "1Y" | "3Y" | "5Y"
+  >("3Y");
+
+  const [showSipAppsSheet, setShowSipAppsSheet] =
+    useState(false);
 
   const { data: livePrice } = useGoldPrice();
   const { mutate: createPaymentMutation, isPending: isCreatingPayment } =
@@ -24,9 +42,90 @@ export default function GoldPage() {
     livePrice?.current_price,
   );
 
+  const UPI_APPS = [
+    {
+      id: "PHONEPE",
+      label: "PhonePe",
+      icon: "/UPI_logos/tr_phonepe.png",
+    },
+    {
+      id: "GPAY",
+      label: "Google Pay",
+      icon: "/UPI_logos/tr_googlepay.png",
+    },
+    {
+      id: "PAYTM",
+      label: "Paytm",
+      icon: "/UPI_logos/tr_paytm.png",
+    },
+    {
+      id: "CRED",
+      label: "CRED",
+      icon: "/UPI_logos/tr_cred_logo.png",
+    },
+  ];
+
+  const formatApiDate = (date: Date) => {
+    const year = String(date.getFullYear()).slice(2);
+    const month = String(
+      date.getMonth() + 1,
+    ).padStart(2, "0");
+    const day = String(date.getDate()).padStart(
+      2,
+      "0",
+    );
+
+    return `${year}-${month}-${day}`;
+  };
+
+  const getFromDate = () => {
+    const today = new Date();
+    const from = new Date();
+
+    switch (selectedRange) {
+      case "6M":
+        from.setMonth(today.getMonth() - 6);
+        break;
+
+      case "1Y":
+        from.setFullYear(today.getFullYear() - 1);
+        break;
+
+      case "3Y":
+        from.setFullYear(today.getFullYear() - 3);
+        break;
+
+      case "5Y":
+        from.setFullYear(today.getFullYear() - 5);
+        break;
+    }
+
+    return formatApiDate(from);
+  };
+
+  const todayDate = formatApiDate(new Date());
+
+  const {
+    data: historicalData,
+    isLoading: isChartLoading,
+  } = useGoldHistoricalPrice({
+    from_date: getFromDate(),
+    to_date: todayDate,
+    type: "m",
+  });
+
   const handleStartInvestment = async () => {
     try {
       if (!amount) return;
+
+      /*
+       * For SIP, we directly show UPI apps for intent creation
+       */
+
+      if (investmentType !== "ONETIME") {
+        setShowSipAppsSheet(true);
+        return;
+      }
 
       setIsProcessing(true);
 
@@ -99,6 +198,146 @@ export default function GoldPage() {
     }
   };
 
+  const handleSipSetup = async (
+    selectedApp: string,
+  ) => {
+    try {
+      setIsProcessing(true);
+
+      /*
+       * STEP 1
+       * BUY VERIFY
+       */
+
+      const verifyResponse =
+        await verifyGoldPurchase({
+          rate_id:
+            livePrice?.rate_id,
+
+          gold_amount:
+            breakdown?.gold_amount,
+
+          buy_price:
+            Number(amount),
+        });
+
+      const txId =
+        verifyResponse?.tx_id;
+
+      if (!txId) {
+        setIsProcessing(false);
+        return;
+      }
+
+      /*
+       * ANDROID PACKAGE MAP
+       */
+
+      const PACKAGE_MAP: Record<
+        string,
+        string
+      > = {
+        PHONEPE:
+          'com.phonepe.app',
+
+        GPAY:
+          'com.google.android.apps.nbu.paisa.user',
+
+        PAYTM:
+          'net.one97.paytm',
+
+        CRED:
+          'com.dreamplug.androidapp',
+      };
+
+      const packageName =
+        PACKAGE_MAP[selectedApp];
+
+      /*
+       * STEP 2
+       * CREATE SIP INTENT
+       */
+
+      const payload = {
+        frequency:
+          investmentType,
+
+        amount:
+          Number(amount),
+
+        deviceOS:
+          'ANDROID',
+
+        targetApp:
+          packageName,
+
+        safegoldTxId:
+          txId,
+
+        productType:
+          'GOLD',
+      };
+
+      const response =
+        await createSipIntent(
+          payload
+        );
+
+      const intentUrl =
+        response?.intentUrl;
+
+      const merchantOrderId =
+        response?.merchantOrderId;
+
+      if (
+        !intentUrl ||
+        !merchantOrderId
+      ) {
+        setIsProcessing(false);
+        return;
+      }
+
+      setShowSipAppsSheet(false);
+
+      /*
+       * MOBILE APP
+       */
+
+      if (typeof window !== 'undefined' && window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage(
+          JSON.stringify({
+            type: 'OPEN_UPI_INTENT',
+            url: intentUrl,
+            targetApp: PACKAGE_MAP[selectedApp], // pass the package name
+            orderId: merchantOrderId,   // ADD THIS
+            txId: txId,
+          })
+        );
+      } else {
+        /*
+         * PWA WEB
+         */
+
+        localStorage.setItem(
+          'sip_order_id',
+          merchantOrderId,
+        );
+
+        localStorage.setItem(
+          'sip_tx_id',
+          String(txId),
+        );
+
+        window.location.href =
+          intentUrl;
+      }
+    } catch (err) {
+      console.log(err);
+
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="bg-white min-h-screen pb-6">
       <div className="flex items-center justify-between px-6 pt-12 pb-4 bg-white">
@@ -148,13 +387,13 @@ export default function GoldPage() {
       </div>
 
       {/*  Hero Card */}
-      <div className="mx-4 mt-4 relative overflow-hidden rounded-[18px] bg-[#FAF8F5] border border-[#ECECEC]">
+      <div className="mx-4 mt-4 relative overflow-hidden rounded-[18px] bg-[#FAF8F5] border border-[#ECECEC] pointer-events-none">
         {/* Background Image */}
         <Image
           src="/images/gold/gold.png"
           alt="gold-bg"
           fill
-          className="object-cover"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
           priority
         />
 
@@ -208,7 +447,7 @@ export default function GoldPage() {
         <div className="w-2 h-2 bg-gray-400 rounded-full" />
       </div>
 
-      <div className="px-4 mt-6">
+      <div className="px-4 mt-6 relative z-50">
         <h3 className="text-sm text-[#B5B7B9] uppercase mb-3">Quick Actions</h3>
 
         <div className="grid grid-cols-2 gap-3">
@@ -230,61 +469,37 @@ export default function GoldPage() {
               icon: "/images/gold/onetime.png",
             },
           ].map((item, i) => (
-            <button
+            <QuickActionCard
               key={i}
+              title={item.title}
+              icon={item.icon}
+              recommended={
+                item.title === "Monthly SIP"
+              }
               onClick={() => {
-                /*
-                 * RESET
-                 */
-
                 setAmount("");
                 setSelectedChip(null);
                 setShowBreakdown(false);
 
-                /*
-                 * ONLY ONE TIME INVESTMENT
-                 * SHOULD OPEN PAYMENT FLOW
-                 */
+                const typeMap: Record<
+                  string,
+                  "ONETIME" | "DAILY" | "WEEKLY" | "MONTHLY"
+                > = {
+                  "One-Time Investment":
+                    "ONETIME",
+                  "Daily SIP": "DAILY",
+                  "Weekly SIP": "WEEKLY",
+                  "Monthly SIP":
+                    "MONTHLY",
+                };
 
-                if (
-                  item.title ===
-                  "One-Time Investment"
-                ) {
-                  setShowAmountBox(true);
-                } else {
-                  setShowAmountBox(false);
-                }
+                setInvestmentType(
+                  typeMap[item.title],
+                );
+
+                setShowAmountBox(true);
               }}
-              className="
-          relative
-          w-full
-          h-[92px]
-          bg-white
-          border border-[#F1F1F1]
-          rounded-[14px]
-          shadow-sm
-          flex flex-col items-center justify-center
-          active:scale-[0.98]
-          transition
-        "
-            >
-              {/* Recommended */}
-              {item.title === "Monthly SIP" && (
-                <div className="absolute top-0 right-0 bg-[#16A34A] text-white text-[8px] px-2 py-1 rounded-tr-[14px] rounded-bl-[10px] font-semibold">
-                  RECOMMENDED
-                </div>
-              )}
-
-              <img
-                src={item.icon}
-                alt={item.title}
-                className="w-[34px] h-[34px] object-contain"
-              />
-
-              <p className="text-[14px] mt-2 font-medium text-black">
-                {item.title}
-              </p>
-            </button>
+            />
           ))}
         </div>
 
@@ -368,7 +583,9 @@ export default function GoldPage() {
           >
             {isProcessing
               ? "Processing..."
-              : "Start Investing"}
+              : investmentType === "ONETIME"
+                ? "Start Investing"
+                : `Setup ${investmentType} SIP`}
           </button>
         </div>
       )}
@@ -402,251 +619,204 @@ export default function GoldPage() {
           </p>
 
           {/* Tabs */}
+          {/* Tabs */}
           <div className="flex justify-between mt-5">
             {["6M", "1Y", "3Y", "5Y"].map((tab) => (
               <button
                 key={tab}
+                onClick={() =>
+                  setSelectedRange(
+                    tab as
+                    | "6M"
+                    | "1Y"
+                    | "3Y"
+                    | "5Y",
+                  )
+                }
                 className={`
-            w-[68px]
-            h-[48px]
-            rounded-[12px]
-            border
-            text-[18px]
-            font-medium
-            transition-all
-            ${tab === "3Y"
+        w-[68px]
+        h-[48px]
+        rounded-[12px]
+        border
+        text-[18px]
+        font-medium
+        transition-all
+        ${selectedRange === tab
                     ? "bg-[#D4AF37] border-[#D4AF37] text-white"
                     : "bg-white border-[#E5E7EB] text-[#222222]"
                   }
-          `}
+      `}
               >
                 {tab}
               </button>
             ))}
           </div>
-
-          {/* Chart Area */}
-          <div className="relative mt-6 h-[240px] bg-[#F9F9FB] rounded-lg overflow-hidden">
-            {/* Graph */}
-            <div className="absolute inset-0">
-              <svg viewBox="0 0 300 200" className="w-full h-full">
-                {/* Line */}
-                <path
-                  d="M0 180 C50 170, 80 150, 110 130 C140 110, 170 120, 200 90 C230 60, 260 80, 300 70"
-                  fill="none"
-                  stroke="#D4AF37"
-                  strokeWidth="2"
-                />
-
-                {/* Fill */}
-                <path
-                  d="M0 180 C50 170, 80 150, 110 130 C140 110, 170 120, 200 90 C230 60, 260 80, 300 70 L300 200 L0 200 Z"
-                  fill="#D4AF37"
-                  opacity="0.12"
-                />
-              </svg>
-            </div>
-
-            {/* Highlight Dot */}
-            <div className="absolute right-[58px] top-[88px] w-[12px] h-[12px] rounded-full bg-[#D4AF37]" />
-
-            {/* Tooltip */}
-            <div className="absolute right-[68px] top-[36px] bg-white px-3 py-2 rounded-[10px] border border-[#F3F3F3] shadow-sm">
-              <p className="text-[10px] text-[#9CA3AF] text-center">MAY'25</p>
-
-              <p className="text-[13px] font-semibold text-[#D4AF37] text-center">
-                ₹1,305.49/g
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="px-4 mt-6">
-        <div
-          className="
-      bg-[#F9F9FB]
-      rounded-lg
-      border border-[#F3F3F3]
-      shadow
-      p-4
-      flex justify-between items-start
-    "
-        >
-          {/* LEFT */}
-          <div>
-            <h3 className="text-[14px] font-semibold text-black">
-              Instant SIP
-            </h3>
-
-            <p className="text-[10px] text-gray-400 mt-1 leading-tight">
-              START SMALL, GROW BIG EVERY MONTH.
-            </p>
-
-            <h2 className="text-[26px] font-bold mt-2 text-black">
-              ₹2000{" "}
-              <span className="text-[12px] text-gray-400 font-medium">
-                / MONTH
-              </span>
-            </h2>
-
-            <button className="mt-4 w-[184px] h-[43px] bg-[#00130C] rounded-[10px] text-white text-[13px] font-medium flex items-center justify-center">
-              Instant SIP
-            </button>
-          </div>
-
-          {/* RIGHT ICON */}
-          <div className="w-[38px] h-[38px] bg-[#EFE3C2] rounded-md flex items-center justify-center">
-            <svg
-              width="14"
-              height="26"
-              viewBox="0 0 14 26"
-              xmlns="http://www.w3.org/2000/svg"
-              className="rotate-180"
-            >
-              <path d="M8.5 0L1 14H6L4.5 26L13 10H8L8.5 0Z" fill="#775A19" />
-            </svg>
-          </div>
-        </div>
-      </div>
-      <div className="mt-6">
-        <h3 className="text-sm text-[#B5B7B9] mb-3 font-inter uppercase px-4">
-          Authenticity Certificate
-        </h3>
-
-        <div className="flex gap-4 overflow-x-scroll no-scrollbar snap-x snap-mandatory px-4">
-          {[
-            "/images/gold/safegold.png",
-            "/images/gold/vistra.png",
-            "/images/gold/brinks.png",
-          ].map((src, i) => (
-            <div key={i} className="min-w-[260px] snap-start">
-              <Image
-                src={src}
-                alt="certificate"
-                width={300}
-                height={300}
-                className="w-full h-auto object-contain rounded-[12px]"
+          {/* Chart */}
+          <div className="mt-6">
+            {isChartLoading ? (
+              <div className="h-[360px] rounded-[20px] bg-[#F3F4F6] animate-pulse" />
+            ) : (
+              <GoldPriceChart
+                data={historicalData?.data || []}
               />
-            </div>
-          ))}
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="px-4 mt-6">
-        {/* Heading */}
-        <h3 className="text-[15px] font-inter font-semibold text-[#B5B7B9] mb-2">
-          FAQs
-        </h3>
+      <InstantSipCard
+        loading={isProcessing}
+        onClick={async () => {
+          try {
+            setIsProcessing(true);
 
-        {/* FAQ Container */}
-        <div className="bg-transparent rounded-[14px] overflow-hidden">
-          {[
-            {
-              question: "Why should I upgrade?",
-              answer:
-                "Upgrading gives you access to premium features and better investment benefits.",
-            },
-            {
-              question: "What payment methods can I use?",
-              answer:
-                "You can pay using UPI, debit cards, credit cards, and net banking.",
-            },
-            {
-              question: "How does billing work?",
-              answer:
-                "Billing is processed automatically according to your selected investment plan.",
-            },
-            {
-              question: "How can I cancel?",
-              answer:
-                "You can cancel anytime directly from your profile settings.",
-            },
-          ].map((faq, i) => (
-            <details
-              key={i}
-              className="border-b border-dashed border-[#E5E5E5] py-5 group"
-            >
-              {/* Question */}
-              <summary className="list-none flex items-start justify-between cursor-pointer">
-                <p className="text-[16px] leading-[24px] text-[#111827] font-inter pr-4">
-                  {faq.question}
-                </p>
+            /*
+             * DEFAULT SIP CONFIG
+             */
 
-                {/* Plus / Minus */}
-                <span className="text-[#9CA3AF] text-[22px] leading-none transition-all duration-200 group-open:rotate-45">
-                  +
-                </span>
-              </summary>
+            const sipAmount = 2000;
+            const sipType = "MONTHLY";
 
-              {/* Answer */}
-              <p className="mt-3 text-[14px] leading-[22px] text-[#6B7280] pr-6">
-                {faq.answer}
-              </p>
-            </details>
-          ))}
-        </div>
-      </div>
+            /*
+             * STEP 1
+             * GET BREAKDOWN
+             */
 
-      <div className="mt-10 px-6 pb-8">
-        {/* View More */}
-        <div className="flex justify-center">
-          <button className="text-[14px] text-[#C3C3C5] border-b border-[#C3C3C5] pb-[2px] tracking-wide">
-            VIEW MORE
-          </button>
-        </div>
+            const breakdownResponse =
+              await getGoldBreakdown({
+                amount: sipAmount,
+                type: "RS",
+                rate:
+                  livePrice?.current_price,
+              });
 
-        {/* Features */}
-        <div className="flex justify-between items-center mt-10 text-center">
-          {/* Item 1 */}
-          <div className="flex-1">
-            <p className="text-[18px] leading-[34px] text-[#C3C3C5] font-normal">
-              100% Safe & <br /> Secure
-            </p>
-          </div>
+            /*
+             * STEP 2
+             * BUY VERIFY
+             */
 
-          {/* Divider */}
-          <div className="w-[1px] h-[92px] bg-[#E5E5E5]" />
+            const verifyResponse =
+              await verifyGoldPurchase({
+                rate_id:
+                  livePrice?.rate_id,
 
-          {/* Item 2 */}
-          <div className="flex-1">
-            <p className="text-[18px] leading-[34px] text-[#C3C3C5] font-normal">
-              24k Gold <br /> Savings
-            </p>
-          </div>
+                gold_amount:
+                  breakdownResponse?.gold_amount,
 
-          {/* Divider */}
-          <div className="w-[1px] h-[92px] bg-[#E5E5E5]" />
+                buy_price:
+                  sipAmount,
+              });
 
-          {/* Item 3 */}
-          <div className="flex-1">
-            <p className="text-[18px] leading-[34px] text-[#C3C3C5] font-normal">
-              Withdraw <br /> Anytime
-            </p>
-          </div>
-        </div>
+            const txId =
+              verifyResponse?.tx_id;
 
-        {/* Disclaimer */}
-        <div className="flex items-center justify-between mt-14">
-          <h3 className="text-[16px] font-medium text-black">Disclaimer</h3>
+            if (!txId) {
+              setIsProcessing(false);
+              return;
+            }
 
-          <svg
-            width="26"
-            height="26"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M6 9L12 15L18 9"
-              stroke="black"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-      </div>
+            /*
+             * PHONEPE PACKAGE
+             */
+
+            const packageName =
+              "com.phonepe.app";
+
+            /*
+             * STEP 3
+             * CREATE SIP INTENT
+             */
+
+            const response =
+              await createSipIntent({
+                frequency:
+                  sipType,
+
+                amount:
+                  sipAmount,
+
+                deviceOS:
+                  "ANDROID",
+
+                targetApp:
+                  packageName,
+
+                safegoldTxId:
+                  txId,
+
+                productType:
+                  "GOLD",
+              });
+
+            const intentUrl =
+              response?.intentUrl;
+
+            const merchantOrderId =
+              response?.merchantOrderId;
+
+            if (
+              !intentUrl ||
+              !merchantOrderId
+            ) {
+              setIsProcessing(false);
+              return;
+            }
+
+            /*
+             * MOBILE APP
+             */
+
+            if (
+              typeof window !==
+              "undefined" &&
+              window.ReactNativeWebView
+            ) {
+              window.ReactNativeWebView.postMessage(
+                JSON.stringify({
+                  type:
+                    "OPEN_UPI_INTENT",
+
+                  url: intentUrl,
+
+                  targetApp:
+                    packageName,
+
+                  orderId:
+                    merchantOrderId,
+
+                  txId,
+                }),
+              );
+            } else {
+              /*
+               * PWA WEB
+               */
+
+              localStorage.setItem(
+                "sip_order_id",
+                merchantOrderId,
+              );
+
+              localStorage.setItem(
+                "sip_tx_id",
+                String(txId),
+              );
+
+              window.location.href =
+                intentUrl;
+            }
+          } catch (err) {
+            console.log(err);
+          } finally {
+            setIsProcessing(false);
+          }
+        }}
+      />
+      <CertificateCarousel />
+
+      <FaqSection />
+
+      <GoldFeatures />
 
       <BottomSheet
         open={showBreakdown}
@@ -743,6 +913,51 @@ export default function GoldPage() {
                 All investments are secure
               </span>
             </div>
+          </div>
+        </div>
+      </BottomSheet>
+
+      <BottomSheet
+        open={showSipAppsSheet}
+        onClose={() =>
+          setShowSipAppsSheet(false)
+        }
+      >
+        <div className="px-4 pb-8">
+          <h2 className="text-[20px] font-semibold text-black">
+            Select UPI App
+          </h2>
+
+          <div className="grid grid-cols-2 gap-4 mt-6">
+            {UPI_APPS.map((app) => (
+              <button
+                key={app.id}
+                onClick={() =>
+                  handleSipSetup(app.id)
+                }
+                className="
+            h-[110px]
+            rounded-2xl
+            border
+            border-[#ECECEC]
+            flex
+            flex-col
+            items-center
+            justify-center
+            active:scale-[0.98]
+            transition
+          "
+              >
+                <img
+                  src={app.icon}
+                  className="w-12 h-12 object-contain"
+                />
+
+                <p className="mt-3 text-sm font-medium text-black">
+                  {app.label}
+                </p>
+              </button>
+            ))}
           </div>
         </div>
       </BottomSheet>
