@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCreatePayment } from "@/hooks/mutations/useCreatePayment";
 
-export default function SilverPage() {
+export default function GoldPage() {
   const router = useRouter();
 
   const [showAmountBox, setShowAmountBox] = useState(false);
   const [amount, setAmount] = useState("");
+  // Add this state alongside your existing states
   const [selectedChip, setSelectedChip] = useState<string | null>(null);
   const [showBreakdown, setShowBreakdown] = useState(false);
 
@@ -18,20 +19,26 @@ export default function SilverPage() {
 
   const handleStartInvestment = () => {
     if (!amount) return;
+
     createPaymentMutation(
       {
         amount: Number(amount),
         safegold_tx_id: 2006745356,
-        productType: "SILVER",
+        productType: "GOLD",
         deviceName: "mobile",
       },
       {
         onSuccess: (response) => {
           const checkoutUrl = response?.checkout_url;
+
           if (!checkoutUrl) return;
+
           if (typeof window !== "undefined" && window.ReactNativeWebView) {
             window.ReactNativeWebView.postMessage(
-              JSON.stringify({ type: "OPEN_PAYMENT_PAGE", url: checkoutUrl }),
+              JSON.stringify({
+                type: "OPEN_PAYMENT_PAGE",
+                url: checkoutUrl,
+              }),
             );
           } else {
             window.location.href = checkoutUrl;
@@ -40,9 +47,9 @@ export default function SilverPage() {
       },
     );
   };
+
   return (
     <div className="bg-white min-h-screen pb-6">
-      {/* 🔹 Header */}
       <div className="flex items-center justify-between px-6 pt-12 pb-4 bg-white">
         {/* Back Button */}
         <button
@@ -66,10 +73,10 @@ export default function SilverPage() {
         </button>
 
         {/* Right Side (Price instead of search) */}
-        <div className="w-[111px] h-[32.46px] bg-[#F9F8F7] rounded-[18.85px] flex items-center px-2 gap-1.5">
+        <div className="w-[111px] h-[32.46px] bg-[#FFF4DD] rounded-[18.85px] flex items-center px-2 gap-1.5">
           {/* Wifi Icon */}
           <Image
-            src="/images/silver/wifi-silver.svg"
+            src="/images/wifi.svg"
             alt="live"
             width={14}
             height={14}
@@ -89,12 +96,12 @@ export default function SilverPage() {
         </div>
       </div>
 
-      {/* 🔹 Hero Card */}
-      <div className="mx-4 mt-4 relative overflow-hidden rounded-[18px] bg-[#F7F4F3] border border-[#ECECEC]">
+      {/*  Hero Card */}
+      <div className="mx-4 mt-4 relative overflow-hidden rounded-[18px] bg-[#FAF8F5] border border-[#ECECEC]">
         {/* Background Image */}
         <Image
-          src="/images/silver/silver.png"
-          alt="silver-bg"
+          src="/images/gold/gold.png"
+          alt="gold-bg"
           fill
           className="object-cover"
           priority
@@ -106,13 +113,13 @@ export default function SilverPage() {
           <div className="flex-1">
             {/* Top Text */}
             <p className="font-serif text-[15px] leading-[16px] text-black whitespace-nowrap">
-              Silver has soared nearly
+              Gold has soared nearly
             </p>
 
-            {/* 171% */}
+            {/* 50% */}
             <div className="flex items-end mt-[4px] gap-[4px]">
               <span className="font-serif text-[38px] leading-[38px] text-[#FFFFFF]">
-                171%
+                50%
               </span>
 
               <span className="font-serif text-[16px] leading-[16px] text-black mb-[4px] whitespace-nowrap">
@@ -133,10 +140,10 @@ export default function SilverPage() {
             </p>
           </div>
 
-          {/* Right Silver Image */}
+          {/* Right Gold Image */}
           <Image
-            src="/images/silver/silver-fine.png"
-            alt="silver"
+            src="/images/gold/gold-fine.png"
+            alt="gold"
             width={160}
             height={160}
             className="object-contain -mr-4 relative z-10"
@@ -144,17 +151,14 @@ export default function SilverPage() {
         </div>
       </div>
 
-      {/* 🔹 Dots */}
       <div className="flex justify-center gap-1 mt-2">
         <div className="w-2 h-2 bg-gray-300 rounded-full" />
         <div className="w-2 h-2 bg-gray-300 rounded-full" />
         <div className="w-2 h-2 bg-gray-400 rounded-full" />
       </div>
 
-      {/* 🔹 Quick Actions */}
-      {/* 🔹 Quick Actions */}
       <div className="px-4 mt-6">
-        <h3 className="text-sm text-gray-500 mb-3">Quick Actions</h3>
+        <h3 className="text-sm text-[#B5B7B9] uppercase mb-3">Quick Actions</h3>
 
         <div className="grid grid-cols-2 gap-3">
           {[
@@ -178,64 +182,44 @@ export default function SilverPage() {
             <button
               key={i}
               onClick={() => {
-                if (item.title === "Weekly SIP") {
-                  router.push("/silver/invest");
-                }
                 if (
-                  item.title === "Daily SIP" ||
+                  item.title === "Weekly SIP" ||
                   item.title === "Monthly SIP"
                 ) {
+                  router.push("/gold/invest");
+                }
+
+                if (item.title === "Daily SIP") {
                   setShowAmountBox(true);
                 }
               }}
               className="
           relative
           w-full
-          h-[105px]
+          h-[92px]
           bg-white
-          border border-[#F7F7FA]
-          rounded-[10px]
-          shadow-[0px_4px_4px_rgba(0,0,0,0.04)]
+          border border-[#F1F1F1]
+          rounded-[14px]
+          shadow-sm
           flex flex-col items-center justify-center
-          overflow-hidden
-          active:scale-[0.98] transition
+          active:scale-[0.98]
+          transition
         "
             >
-              {/* Recommended Tag */}
+              {/* Recommended */}
               {item.title === "Monthly SIP" && (
-                <div
-                  className="
-              absolute
-              top-0
-              right-0
-              w-[76px]
-              h-[20px]
-              bg-[#16A34A]
-              text-white
-              text-[8px]
-              font-semibold
-              flex items-center justify-center
-              rounded-tl-[10px]
-              rounded-tr-[2.3px]
-              rounded-br-[2.3px]
-              rounded-bl-[10px]
-            "
-                >
+                <div className="absolute top-0 right-0 bg-[#16A34A] text-white text-[8px] px-2 py-1 rounded-tr-[14px] rounded-bl-[10px] font-semibold">
                   RECOMMENDED
                 </div>
               )}
 
-              {/* Icon */}
-              <Image
+              <img
                 src={item.icon}
                 alt={item.title}
-                width={36}
-                height={36}
-                className="object-contain"
+                className="w-[34px] h-[34px] object-contain"
               />
 
-              {/* Text */}
-              <p className="text-[13px] mt-2 text-center leading-tight text-[#1D1D1F] font-medium">
+              <p className="text-[14px] mt-2 font-medium text-black">
                 {item.title}
               </p>
             </button>
@@ -244,13 +228,14 @@ export default function SilverPage() {
 
         {showAmountBox && (
           <div className="mt-4">
+            {/* Input */}
             <div className="w-full h-[74px] border border-[#E7E7E7] rounded-[16px] px-5 flex items-center bg-white">
               <input
                 type="number"
                 value={amount}
                 onChange={(e) => {
                   setAmount(e.target.value);
-                  setSelectedChip(null);
+                  setSelectedChip(null); // clear chip selection on manual type
                   setShowBreakdown(false);
                 }}
                 placeholder="Enter Amount"
@@ -258,27 +243,32 @@ export default function SilverPage() {
               />
             </div>
 
+            {/* Amount Chips */}
             <div className="flex gap-2 mt-3 overflow-x-auto no-scrollbar">
               {["₹2,000", "₹5,000", "₹10,000", "₹15,000"].map((item, i) => (
                 <button
                   key={i}
                   onClick={() => {
-                    setAmount(item.replace(/[₹,]/g, ""));
+                    const val = item.replace(/[₹,]/g, "");
+                    setAmount(val);
                     setSelectedChip(item);
                     setShowBreakdown(false);
                   }}
-                  className={`px-4 h-[34px] rounded-full border text-[15px] text-[#7A7A7A] whitespace-nowrap transition-all
-                    ${
-                      selectedChip === item
-                        ? "border-[#69A1E1] bg-[#EEF4FC] text-[#185FA5] font-semibold"
-                        : "border-[#E5E5E5] bg-[#FAFAFA]"
-                    }`}
+                  className={`
+            px-4 h-[34px] rounded-full border text-[15px] text-[#7A7A7A] whitespace-nowrap transition-all
+            ${
+              selectedChip === item
+                ? "border-[#D4AF37] bg-[#FFF8E7] text-[#B8860B] font-semibold"
+                : "border-[#E5E5E5] bg-[#FAFAFA]"
+            }
+          `}
                 >
                   {item}
                 </button>
               ))}
             </div>
 
+            {/* View Breakdown CTA — only shown when amount is set */}
             {amount && (
               <button
                 onClick={() => setShowBreakdown((prev) => !prev)}
@@ -310,13 +300,12 @@ export default function SilverPage() {
               </button>
             )}
 
+            {/* Breakdown Details */}
             {showBreakdown && amount && (
               <div className="mt-2 rounded-[16px] border border-[#ECECEC] bg-white overflow-hidden">
-                {/* Silver Value */}
-                <div className="flex justify-between items-center px-4 py-4 bg-white">
-                  <span className="text-[14px] text-[#111111]">
-                    Silver Value
-                  </span>
+                {/* Row: Gold Value */}
+                <div className="flex justify-between items-center px-4 py-3 border-b border-dashed border-[#ECECEC]">
+                  <span className="text-[14px] text-[#111111]">Gold Value</span>
                   <span className="text-[14px] text-[#111111]">
                     ₹{" "}
                     {(Number(amount) * 0.9709).toLocaleString("en-IN", {
@@ -326,8 +315,8 @@ export default function SilverPage() {
                   </span>
                 </div>
 
-                {/* GST */}
-                <div className="flex justify-between items-center px-4 py-4 bg-white border-t border-dashed border-[#E5E5E5]">
+                {/* Row: GST */}
+                <div className="flex justify-between items-center px-4 py-3 border-b border-dashed border-[#ECECEC]">
                   <span className="text-[14px] text-[#111111]">GST (3%)</span>
                   <span className="text-[14px] text-[#111111]">
                     ₹{" "}
@@ -338,24 +327,24 @@ export default function SilverPage() {
                   </span>
                 </div>
 
-                {/* Silver Quality — solid separator above and below */}
-                <div className="flex justify-between items-center px-4 py-4 bg-white border-t border-[#E5E5E5]">
+                {/* Row: Gold Quality */}
+                <div className="flex justify-between items-center px-4 py-3 border-b border-dashed border-[#ECECEC]">
                   <span className="text-[14px] text-[#111111]">
-                    Silver quality
+                    Gold quality
                   </span>
                   <span className="text-[14px] text-[#111111]">
-                    {(Number(amount) / 1305.49).toFixed(4)} gm
+                    {(Number(amount) / 10646.08).toFixed(4)} gm
                   </span>
                 </div>
 
-                {/* Total Savings — green section */}
-                <div className="flex justify-between items-center px-4 py-4 bg-[#F0FBF4] border-t border-[#E5E5E5]">
+                {/* Row: Total Savings (green tinted) */}
+                <div className="flex justify-between items-center px-4 py-3 bg-[#EDFCF4] border-b border-dashed border-[#ECECEC]">
                   <div>
                     <p className="text-[14px] font-semibold text-[#16A34A]">
                       Total Savings
                     </p>
                     <p className="text-[11px] text-[#16A34A] mt-[2px]">
-                      Coupon applied : SILVER100
+                      Coupon applied : GOLD100
                     </p>
                   </div>
                   <span className="text-[14px] font-semibold text-[#16A34A]">
@@ -363,8 +352,8 @@ export default function SilverPage() {
                   </span>
                 </div>
 
-                {/* Total Payable — solid border top, white bg */}
-                <div className="flex justify-between items-center px-4 py-4 bg-white border-t border-[#E5E5E5]">
+                {/* Row: Total Payable */}
+                <div className="flex justify-between items-center px-4 py-4 bg-[#EDFCF4]">
                   <span className="text-[15px] font-semibold text-[#111111]">
                     Total Payable amount
                   </span>
@@ -398,24 +387,27 @@ export default function SilverPage() {
         )}
       </div>
 
-      {/* 🔹 CTA */}
       <div className="mt-6 flex justify-center">
         <button
           onClick={handleStartInvestment}
           disabled={!amount || isCreatingPayment}
-          className="w-[330px] h-[51px] bg-[#111111] rounded-[8px] text-white text-[15px] font-medium flex items-center justify-center disabled:opacity-50"
+          className="w-[330px] h-[51px] bg-[#111111] rounded-[8px] text-white text-[15px] font-medium flex items-center justify-center"
         >
           {isCreatingPayment ? "Processing..." : "Start Investing"}
         </button>
       </div>
 
-      {/* 🔹 Gold Growth Card */}
       <div className="px-4 mt-6">
-        {/* Heading */}
-        <h2 className="text-[13px] font-medium uppercase text-[#B0B0B0] mb-1 tracking-[0.5px]">
-          Market Performance
-        </h2>
+        <Image
+          src="/images/gold/jewellery.png"
+          alt="jewellery"
+          width={400}
+          height={160}
+          className="w-full h-[160px] object-cover rounded-2xl"
+        />
+      </div>
 
+      <div className="px-4 mt-6">
         <div
           className="
       bg-white
@@ -426,12 +418,11 @@ export default function SilverPage() {
     "
         >
           {/* Top Text */}
-
           <p className="text-[11px] leading-[22px] text-[#8E95A4]">
-            The best to purchase silver was yesterday
+            The best to purchase gold was yesterday
             <br />
             but second best is{" "}
-            <span className="text-[#69A1E1] font-medium">NOW!</span>
+            <span className="text-[#D4AF37] font-medium">NOW!</span>
           </p>
 
           {/* Tabs */}
@@ -449,7 +440,7 @@ export default function SilverPage() {
             transition-all
             ${
               tab === "3Y"
-                ? "bg-[#69A1E1] border-[#69A1E1 ] text-white"
+                ? "bg-[#D4AF37] border-[#D4AF37] text-white"
                 : "bg-white border-[#E5E7EB] text-[#222222]"
             }
           `}
@@ -464,36 +455,31 @@ export default function SilverPage() {
             {/* Graph */}
             <div className="absolute inset-0">
               <svg viewBox="0 0 300 200" className="w-full h-full">
-                <defs>
-                  <linearGradient id="blueGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="rgba(105, 161, 225, 0.2)" />
-                    <stop offset="108.83%" stopColor="rgba(105, 161, 225, 0)" />
-                  </linearGradient>
-                </defs>
-
-                {/* Fill */}
-                <path
-                  d="M0 180 C50 170, 80 150, 110 130 C140 110, 170 120, 200 90 C230 60, 260 80, 300 70 L300 200 L0 200 Z"
-                  fill="url(#blueGradient)"
-                />
-
                 {/* Line */}
                 <path
                   d="M0 180 C50 170, 80 150, 110 130 C140 110, 170 120, 200 90 C230 60, 260 80, 300 70"
                   fill="none"
-                  stroke="#69A1E1"
+                  stroke="#D4AF37"
                   strokeWidth="2"
+                />
+
+                {/* Fill */}
+                <path
+                  d="M0 180 C50 170, 80 150, 110 130 C140 110, 170 120, 200 90 C230 60, 260 80, 300 70 L300 200 L0 200 Z"
+                  fill="#D4AF37"
+                  opacity="0.12"
                 />
               </svg>
             </div>
 
             {/* Highlight Dot */}
-            <div className="absolute right-[58px] top-[88px] w-[12px] h-[12px] rounded-full bg-[#69A1E1]" />
+            <div className="absolute right-[58px] top-[88px] w-[12px] h-[12px] rounded-full bg-[#D4AF37]" />
 
             {/* Tooltip */}
             <div className="absolute right-[68px] top-[36px] bg-white px-3 py-2 rounded-[10px] border border-[#F3F3F3] shadow-sm">
               <p className="text-[10px] text-[#9CA3AF] text-center">MAY'25</p>
-              <p className="text-[13px] font-semibold text-[#69A1E1] text-center">
+
+              <p className="text-[13px] font-semibold text-[#D4AF37] text-center">
                 ₹1,305.49/g
               </p>
             </div>
@@ -501,8 +487,6 @@ export default function SilverPage() {
         </div>
       </div>
 
-      {/* 🔹 Instant SIP */}
-      {/* 🔹 Instant SIP (Matched with chart card) */}
       <div className="px-4 mt-6">
         <div
           className="
@@ -537,7 +521,7 @@ export default function SilverPage() {
           </div>
 
           {/* RIGHT ICON */}
-          <div className="w-[38px] h-[38px] bg-[#EEF4FC] rounded-md flex items-center justify-center">
+          <div className="w-[38px] h-[38px] bg-[#EFE3C2] rounded-md flex items-center justify-center">
             <svg
               width="14"
               height="26"
@@ -545,14 +529,11 @@ export default function SilverPage() {
               xmlns="http://www.w3.org/2000/svg"
               className="rotate-180"
             >
-              <path d="M8.5 0L1 14H6L4.5 26L13 10H8L8.5 0Z" fill="#69A1E1" />
+              <path d="M8.5 0L1 14H6L4.5 26L13 10H8L8.5 0Z" fill="#775A19" />
             </svg>
           </div>
         </div>
       </div>
-
-      {/* 🔹 Certificates */}
-      {/* 🔹 Authenticity Certificate Slider */}
       <div className="mt-6">
         <h3 className="text-sm text-[#B5B7B9] mb-3 font-inter uppercase px-4">
           Authenticity Certificate
@@ -576,45 +557,7 @@ export default function SilverPage() {
           ))}
         </div>
       </div>
-      {/* 🔹 Silver Journey Benefits */}
-      <div className="px-4 mt-6">
-        {/* Top Heading */}
-        <div className="flex items-start justify-between mb-5">
-          <div>
-            <h3 className="text-[12px] font-medium text-[#B5B7B9] uppercase leading-[28px]">
-              Your Silver Journey Begins
-            </h3>
 
-            <p className="text-[10px] text-[#BCBCBC] leading-[22px]">
-              Simple, Secure, And Rewarding Investin
-              <br />
-              In Digital Silver.
-            </p>
-          </div>
-
-          <Image
-            src="/images/silver/silver-fine.png"
-            alt="silver bars"
-            width={120}
-            height={90}
-            className="object-contain -mt-2"
-          />
-        </div>
-
-        {/* Full Combined Image */}
-        <div className="rounded-[18px] overflow-hidden">
-          <Image
-            src="/images/silver/your-silver.png"
-            alt="silver benefits"
-            width={400}
-            height={900}
-            className="w-full h-auto object-contain"
-          />
-        </div>
-      </div>
-
-      {/* 🔹 FAQ */}
-      {/* 🔹 FAQ */}
       <div className="px-4 mt-6">
         {/* Heading */}
         <h3 className="text-[15px] font-inter font-semibold text-[#B5B7B9] mb-2">
@@ -670,7 +613,6 @@ export default function SilverPage() {
         </div>
       </div>
 
-      {/* 🔹 Footer */}
       <div className="mt-10 px-6 pb-8">
         {/* View More */}
         <div className="flex justify-center">
@@ -694,7 +636,7 @@ export default function SilverPage() {
           {/* Item 2 */}
           <div className="flex-1">
             <p className="text-[18px] leading-[34px] text-[#C3C3C5] font-normal">
-              99.9% pure <br /> Silver
+              24k Gold <br /> Savings
             </p>
           </div>
 

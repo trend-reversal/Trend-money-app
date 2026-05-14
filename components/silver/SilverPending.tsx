@@ -3,13 +3,11 @@
 import Image from "next/image";
 import { Info } from "lucide-react";
 
-export default function GoldPending() {
+export default function SilverPending() {
   return (
     <div className="min-h-screen bg-white flex flex-col px-5 pt-20 pb-8 max-w-[430px] mx-auto">
       {/* Top Content */}
       <div className="flex flex-col items-center">
-        {/* Pending Icon */}
-        {/* Pending Icon */}
         {/* Pending Icon */}
         <div className="w-[124px] h-[124px] flex items-center justify-center">
           <Image
@@ -29,31 +27,31 @@ export default function GoldPending() {
         <p className="mt-3 text-[15px] text-[#000000] text-center leading-7 font-regular">
           We’ll notify you once your digital
           <br />
-          gold is confirmed
+          silver is confirmed
         </p>
       </div>
 
-      {/* Gold Card */}
+      {/* Silver Card */}
       <div className="mt-10 bg-white rounded-[18px] border border-[#ECECEC] shadow-sm overflow-hidden">
         <div className="flex items-center justify-between px-5 py-5">
           {/* Left */}
           <div>
             <p className="text-[15px] text-[#9CA3AF]">You are buying</p>
 
-            <h2 className="mt-2 text-[24px] font-semibold text-[#D4AA27]">
-              0.1602 g
+            <h2 className="mt-2 text-[24px] font-semibold text-[#8E8E8E]">
+              10.0000 g
             </h2>
 
             <p className="mt-1 text-[14px] font-semibold tracking-wide text-[#9CA3AF]">
-              24K DIGITAL GOLD
+              DIGITAL SILVER
             </p>
           </div>
 
-          {/* Gold Image */}
+          {/* Silver Image */}
           <div className="relative w-[115px] h-[90px]">
             <Image
-              src="/images/gold/gold-fine.png"
-              alt="gold"
+              src="/images/silver/silver-fine.png"
+              alt="silver"
               fill
               className="object-contain"
             />

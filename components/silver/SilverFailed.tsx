@@ -1,6 +1,6 @@
 "use client";
 
-export default function GoldFailed() {
+export default function SilverFailed() {
   return (
     <div className="min-h-screen bg-white flex flex-col items-center px-6 pt-20 pb-10 max-w-[430px] mx-auto">
       {/* Failed Icon — pink outer ring + red circle */}

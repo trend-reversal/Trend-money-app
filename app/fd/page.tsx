@@ -10,35 +10,25 @@ export default function FDPage() {
   const router = useRouter();
   const { data, isLoading } = useFDs();
 
-  const pageData =
-    data?.data?.[0] || {};
+  const pageData = data?.data?.[0] || {};
 
-  const allFDs =
-    pageData?.bank_cards || [];
-
-
+  const allFDs = pageData?.bank_cards || [];
 
   const fds = allFDs;
-  const bankLogos =
-    pageData?.bank_logos || [];
+  const bankLogos = pageData?.bank_logos || [];
 
-  const handleFDClick = async (
-    issuer: string
-  ) => {
+  const handleFDClick = async (issuer: string) => {
     try {
-      const response =
-        await getFDRedirectUrl({
-          issuer,
-        });
+      const response = await getFDRedirectUrl({
+        issuer,
+      });
 
-      const redirectUrl =
-        response?.data?.redirectUrl;
+      const redirectUrl = response?.data?.redirectUrl;
 
       if (redirectUrl) {
         if (typeof window !== "undefined") {
           // @ts-ignore
-          const isReactNativeWebView =
-            !!window.ReactNativeWebView;
+          const isReactNativeWebView = !!window.ReactNativeWebView;
 
           if (isReactNativeWebView) {
             // @ts-ignore
@@ -46,25 +36,19 @@ export default function FDPage() {
               JSON.stringify({
                 type: "OPEN_FD_URL",
                 url: redirectUrl,
-              })
+              }),
             );
           } else {
-            window.open(
-              redirectUrl,
-              "_blank"
-            );
+            window.open(redirectUrl, "_blank");
           }
         }
       }
     } catch (error) {
-      console.error(
-        "Failed to fetch FD redirect URL",
-        error
-      );
+      console.error("Failed to fetch FD redirect URL", error);
     }
   };
   return (
-    <section className="min-h-screen bg-[#F7F8FA]">
+    <section className="min-h-screen bg-white">
       {/*  HEADER */}
       <div className="flex items-center justify-between px-6 pt-12 pb-4 bg-white">
         <button
@@ -94,7 +78,7 @@ export default function FDPage() {
 
       {/*  HERO */}
       <div className="px-6 mt-4">
-        <div className="relative w-full h-[160px] rounded-[16px] overflow-hidden shadow-sm">
+        <div className="relative w-full h-[160px]  overflow-hidden">
           <Image
             src="/images/fd/fd-banner.png"
             alt="fd-banner"
@@ -117,10 +101,7 @@ export default function FDPage() {
               <div className="flex gap-3 flex-1">
                 <div className="w-[56px] h-[56px] relative rounded-full overflow-hidden border border-[#EEF0F4] bg-white">
                   <Image
-                    src={
-                      item.logo ||
-                      "/images/fd/default.png"
-                    }
+                    src={item.logo || "/images/fd/default.png"}
                     alt={item.name}
                     fill
                     className="object-contain p-2"
@@ -138,10 +119,7 @@ export default function FDPage() {
                     </span>
 
                     <span className="text-[11px] bg-[#EEF2FF] text-[#5B6FFF] px-2 py-[4px] rounded-full">
-                      Min ₹
-                      {Number(
-                        item.min_investment
-                      ).toLocaleString("en-IN")}
+                      Min ₹{Number(item.min_investment).toLocaleString("en-IN")}
                     </span>
                   </div>
                 </div>
@@ -153,23 +131,18 @@ export default function FDPage() {
                   {item.returns}%
                 </p>
 
-                <p className="text-[11px] text-[#9CA3AF] mt-1">
-                  P.A.
-                </p>
+                <p className="text-[11px] text-[#9CA3AF] mt-1">P.A.</p>
               </div>
             </div>
 
             {/* BOTTOM */}
             <div className="flex justify-between items-center mt-5">
-              <span className="text-[11px] text-[#6B7280] font-medium">
-
-              </span>
+              <span className="text-[11px] text-[#6B7280] font-medium"></span>
 
               <button
-                onClick={() =>
-                  handleFDClick(item.issuer)
-                }
-                className="h-[32px] px-4 rounded-full bg-[#F5F7FF] text-[#4F46E5] text-[13px] font-medium">
+                onClick={() => handleFDClick(item.issuer)}
+                className="h-[32px] px-4 rounded-full bg-[#F5F7FF] text-[#4F46E5] text-[13px] font-medium"
+              >
                 View Details
               </button>
             </div>
@@ -191,22 +164,20 @@ export default function FDPage() {
 
           {/* ICONS */}
           <div className="flex justify-center items-center gap-3 mt-4">
-            {bankLogos.slice(0, 5).map(
-              (bank: any, i: number) => (
-                <div
-                  key={i}
-                  className="w-[36px] h-[36px] rounded-full bg-white shadow-sm border border-[#F0F0F0] flex items-center justify-center overflow-hidden"
-                >
-                  <Image
-                    src={bank.logo}
-                    alt={bank.name}
-                    width={20}
-                    height={20}
-                    className="object-contain"
-                  />
-                </div>
-              )
-            )}
+            {bankLogos.slice(0, 5).map((bank: any, i: number) => (
+              <div
+                key={i}
+                className="w-[36px] h-[36px] rounded-full bg-white shadow-sm border border-[#F0F0F0] flex items-center justify-center overflow-hidden"
+              >
+                <Image
+                  src={bank.logo}
+                  alt={bank.name}
+                  width={20}
+                  height={20}
+                  className="object-contain"
+                />
+              </div>
+            ))}
 
             {/* +195 */}
             <div className="w-[36px] h-[36px] rounded-full bg-[#EEF2FF] flex items-center justify-center text-[12px] text-[#5B6FFF] font-medium">
@@ -232,14 +203,10 @@ export default function FDPage() {
         </h2>
 
         {/* 🔹 LIST */}
-        <div
-
-          className="space-y-3">
+        <div className="space-y-3">
           {fds.map((item: any, i: number) => (
             <div
-              onClick={() =>
-                handleFDClick(item.issuer)
-              }
+              onClick={() => handleFDClick(item.issuer)}
               key={i}
               className="bg-white rounded-[14px] border border-[#ECECEC] shadow-[0px_3px_6px_rgba(0,0,0,0.05)] px-4 py-3 flex justify-between items-center"
             >
@@ -259,10 +226,7 @@ export default function FDPage() {
                     {item.name}
                   </p>
                   <p className="text-[12px] text-gray-500 mt-[2px]">
-                    Min. ₹
-                    {Number(
-                      item.min_investment
-                    ).toLocaleString("en-IN")}{" "}
+                    Min. ₹{Number(item.min_investment).toLocaleString("en-IN")}{" "}
                     • {item.rating}
                   </p>
                 </div>

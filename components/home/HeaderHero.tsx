@@ -231,7 +231,10 @@ export default function HeaderHero() {
             {assets[index].value}
           </span>
         </p>
-        <button className="w-[135px] h-[41px] mt-4 bg-[#131314] text-white rounded-[6px] text-[14px] active:scale-[0.98] transition">
+        <button
+          onClick={() => router.push(assets[index].route)}
+          className="w-[135px] h-[41px] mt-4 bg-[#131314] text-white rounded-[6px] text-[14px] active:scale-[0.98] transition"
+        >
           Invest Now
         </button>
       </div>
