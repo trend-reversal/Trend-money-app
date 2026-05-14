@@ -62,7 +62,9 @@ export default function DeleteAccountPage() {
         </button>
 
         <button
-          onClick={() => alert("Delete account API not connected yet")}
+          onClick={() =>
+            router.push("/profile/profile-settings/delete-account-reason")
+          }
           className="w-full mt-4 text-[14px] font-medium text-[#EF4444] active:scale-[0.98] transition"
         >
           Delete Account

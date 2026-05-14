@@ -17,15 +17,17 @@ export default function ProfilePage() {
     {
       icon: <Settings size={18} color="#4B5563" />,
       label: "Settings",
-      route: "/settings",
+      route: "/profile/profile-settings",
     },
     {
       icon: <UserPlus size={18} color="#4B5563" />,
       label: "Add Nominee",
+      route: "/profile/nominee",
     },
     {
       icon: <MessageSquare size={18} color="#4B5563" />,
       label: "Share Feedback",
+      route: "/profile/share-feedback",
     },
   ];
 
