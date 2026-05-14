@@ -150,7 +150,12 @@ export default function ProfilePage() {
 
       {/* Footer */}
       <div className="absolute bottom-5 left-0 right-0 max-w-[430px] mx-auto px-4">
-        <p className="text-[11px] text-[#2563EB]">About Trend Reversal</p>
+        <button
+          onClick={() => router.push("/profile/about-trend-reversal")}
+          className="text-[11px] text-[#2563EB]"
+        >
+          About Trend Reversal
+        </button>
 
         <p className="text-[10px] text-[#7B7B7B] mt-1">App Version 0.1</p>
       </div>

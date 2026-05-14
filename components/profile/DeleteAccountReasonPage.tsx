@@ -63,13 +63,13 @@ export default function DeleteAccountReasonPage() {
             <path
               d="M19 12H5"
               stroke="#000"
-              strokeWidth="2"
+              strokeWidth="3"
               strokeLinecap="round"
             />
             <path
               d="M12 19L5 12L12 5"
               stroke="#000"
-              strokeWidth="2"
+              strokeWidth="3"
               strokeLinecap="round"
             />
           </svg>
