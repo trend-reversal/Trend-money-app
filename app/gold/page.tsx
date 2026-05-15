@@ -15,9 +15,9 @@ import InstantSipCard from "@/components/gold/InstantSipCard";
 import CertificateCarousel from "@/components/gold/CertificateCarousel";
 import FaqSection from "@/components/gold/FaqSection";
 import GoldFeatures from "@/components/gold/GoldFeatures";
-
+import GoldPromoCard from "@/components/gold/GoldPromoCard";
+import GoldSavingOpportunityCard from "@/components/gold/GoldSavingOpportunityCard";
 export default function GoldPage() {
-
   const [showAmountBox, setShowAmountBox] = useState(false);
   const [amount, setAmount] = useState("");
   const [selectedChip, setSelectedChip] = useState<string | null>(null);
@@ -26,12 +26,11 @@ export default function GoldPage() {
   const [investmentType, setInvestmentType] = useState<
     "ONETIME" | "DAILY" | "WEEKLY" | "MONTHLY"
   >("ONETIME");
-  const [selectedRange, setSelectedRange] = useState<
-    "6M" | "1Y" | "3Y" | "5Y"
-  >("3Y");
+  const [selectedRange, setSelectedRange] = useState<"6M" | "1Y" | "3Y" | "5Y">(
+    "3Y",
+  );
 
-  const [showSipAppsSheet, setShowSipAppsSheet] =
-    useState(false);
+  const [showSipAppsSheet, setShowSipAppsSheet] = useState(false);
 
   const { data: livePrice } = useGoldPrice();
   const { mutate: createPaymentMutation, isPending: isCreatingPayment } =
@@ -67,13 +66,8 @@ export default function GoldPage() {
 
   const formatApiDate = (date: Date) => {
     const year = String(date.getFullYear()).slice(2);
-    const month = String(
-      date.getMonth() + 1,
-    ).padStart(2, "0");
-    const day = String(date.getDate()).padStart(
-      2,
-      "0",
-    );
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
 
     return `${year}-${month}-${day}`;
   };
@@ -105,14 +99,12 @@ export default function GoldPage() {
 
   const todayDate = formatApiDate(new Date());
 
-  const {
-    data: historicalData,
-    isLoading: isChartLoading,
-  } = useGoldHistoricalPrice({
-    from_date: getFromDate(),
-    to_date: todayDate,
-    type: "m",
-  });
+  const { data: historicalData, isLoading: isChartLoading } =
+    useGoldHistoricalPrice({
+      from_date: getFromDate(),
+      to_date: todayDate,
+      type: "m",
+    });
 
   const handleStartInvestment = async () => {
     try {
@@ -167,10 +159,7 @@ export default function GoldPage() {
              * MOBILE APP
              */
 
-            if (
-              typeof window !== "undefined" &&
-              window.ReactNativeWebView
-            ) {
+            if (typeof window !== "undefined" && window.ReactNativeWebView) {
               window.ReactNativeWebView.postMessage(
                 JSON.stringify({
                   type: "OPEN_PAYMENT_PAGE",
@@ -198,9 +187,7 @@ export default function GoldPage() {
     }
   };
 
-  const handleSipSetup = async (
-    selectedApp: string,
-  ) => {
+  const handleSipSetup = async (selectedApp: string) => {
     try {
       setIsProcessing(true);
 
@@ -209,20 +196,15 @@ export default function GoldPage() {
        * BUY VERIFY
        */
 
-      const verifyResponse =
-        await verifyGoldPurchase({
-          rate_id:
-            livePrice?.rate_id,
+      const verifyResponse = await verifyGoldPurchase({
+        rate_id: livePrice?.rate_id,
 
-          gold_amount:
-            breakdown?.gold_amount,
+        gold_amount: breakdown?.gold_amount,
 
-          buy_price:
-            Number(amount),
-        });
+        buy_price: Number(amount),
+      });
 
-      const txId =
-        verifyResponse?.tx_id;
+      const txId = verifyResponse?.tx_id;
 
       if (!txId) {
         setIsProcessing(false);
@@ -233,25 +215,17 @@ export default function GoldPage() {
        * ANDROID PACKAGE MAP
        */
 
-      const PACKAGE_MAP: Record<
-        string,
-        string
-      > = {
-        PHONEPE:
-          'com.phonepe.app',
+      const PACKAGE_MAP: Record<string, string> = {
+        PHONEPE: "com.phonepe.app",
 
-        GPAY:
-          'com.google.android.apps.nbu.paisa.user',
+        GPAY: "com.google.android.apps.nbu.paisa.user",
 
-        PAYTM:
-          'net.one97.paytm',
+        PAYTM: "net.one97.paytm",
 
-        CRED:
-          'com.dreamplug.androidapp',
+        CRED: "com.dreamplug.androidapp",
       };
 
-      const packageName =
-        PACKAGE_MAP[selectedApp];
+      const packageName = PACKAGE_MAP[selectedApp];
 
       /*
        * STEP 2
@@ -259,40 +233,26 @@ export default function GoldPage() {
        */
 
       const payload = {
-        frequency:
-          investmentType,
+        frequency: investmentType,
 
-        amount:
-          Number(amount),
+        amount: Number(amount),
 
-        deviceOS:
-          'ANDROID',
+        deviceOS: "ANDROID",
 
-        targetApp:
-          packageName,
+        targetApp: packageName,
 
-        safegoldTxId:
-          txId,
+        safegoldTxId: txId,
 
-        productType:
-          'GOLD',
+        productType: "GOLD",
       };
 
-      const response =
-        await createSipIntent(
-          payload
-        );
+      const response = await createSipIntent(payload);
 
-      const intentUrl =
-        response?.intentUrl;
+      const intentUrl = response?.intentUrl;
 
-      const merchantOrderId =
-        response?.merchantOrderId;
+      const merchantOrderId = response?.merchantOrderId;
 
-      if (
-        !intentUrl ||
-        !merchantOrderId
-      ) {
+      if (!intentUrl || !merchantOrderId) {
         setIsProcessing(false);
         return;
       }
@@ -303,33 +263,26 @@ export default function GoldPage() {
        * MOBILE APP
        */
 
-      if (typeof window !== 'undefined' && window.ReactNativeWebView) {
+      if (typeof window !== "undefined" && window.ReactNativeWebView) {
         window.ReactNativeWebView.postMessage(
           JSON.stringify({
-            type: 'OPEN_UPI_INTENT',
+            type: "OPEN_UPI_INTENT",
             url: intentUrl,
             targetApp: PACKAGE_MAP[selectedApp], // pass the package name
-            orderId: merchantOrderId,   // ADD THIS
+            orderId: merchantOrderId, // ADD THIS
             txId: txId,
-          })
+          }),
         );
       } else {
         /*
          * PWA WEB
          */
 
-        localStorage.setItem(
-          'sip_order_id',
-          merchantOrderId,
-        );
+        localStorage.setItem("sip_order_id", merchantOrderId);
 
-        localStorage.setItem(
-          'sip_tx_id',
-          String(txId),
-        );
+        localStorage.setItem("sip_tx_id", String(txId));
 
-        window.location.href =
-          intentUrl;
+        window.location.href = intentUrl;
       }
     } catch (err) {
       console.log(err);
@@ -387,59 +340,7 @@ export default function GoldPage() {
       </div>
 
       {/*  Hero Card */}
-      <div className="mx-4 mt-4 relative overflow-hidden rounded-[18px] bg-[#FAF8F5] border border-[#ECECEC] pointer-events-none">
-        {/* Background Image */}
-        <Image
-          src="/images/gold/gold.png"
-          alt="gold-bg"
-          fill
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-          priority
-        />
-
-        {/* Overlay Content */}
-        <div className="relative z-10 flex items-center justify-between px-[18px] py-[16px]">
-          {/* Left Content */}
-          <div className="flex-1">
-            {/* Top Text */}
-            <p className="font-serif text-[15px] leading-[16px] text-black whitespace-nowrap">
-              Gold has soared nearly
-            </p>
-
-            {/* 50% */}
-            <div className="flex items-end mt-[4px] gap-[4px]">
-              <span className="font-serif text-[38px] leading-[38px] text-[#FFFFFF]">
-                50%
-              </span>
-
-              <span className="font-serif text-[16px] leading-[16px] text-black mb-[4px] whitespace-nowrap">
-                this year!
-              </span>
-            </div>
-
-            {/* Divider */}
-            <div className="w-[28px] h-[1px] bg-black mt-[8px] mb-[10px]" />
-
-            {/* Bottom Text */}
-            <p className="font-serif text-[9px] leading-[11px] text-black">
-              Don’t miss the shine,
-            </p>
-
-            <p className="font-serif text-[9px] leading-[11px] text-[#1A1A1A] mt-[2px]">
-              start your journey today
-            </p>
-          </div>
-
-          {/* Right Gold Image */}
-          <Image
-            src="/images/gold/gold-fine.png"
-            alt="gold"
-            width={160}
-            height={160}
-            className="object-contain -mr-4 relative z-10"
-          />
-        </div>
-      </div>
+      <GoldPromoCard />
 
       <div className="flex justify-center gap-1 mt-2">
         <div className="w-2 h-2 bg-gray-300 rounded-full" />
@@ -473,9 +374,7 @@ export default function GoldPage() {
               key={i}
               title={item.title}
               icon={item.icon}
-              recommended={
-                item.title === "Monthly SIP"
-              }
+              recommended={item.title === "Monthly SIP"}
               onClick={() => {
                 setAmount("");
                 setSelectedChip(null);
@@ -485,24 +384,20 @@ export default function GoldPage() {
                   string,
                   "ONETIME" | "DAILY" | "WEEKLY" | "MONTHLY"
                 > = {
-                  "One-Time Investment":
-                    "ONETIME",
+                  "One-Time Investment": "ONETIME",
                   "Daily SIP": "DAILY",
                   "Weekly SIP": "WEEKLY",
-                  "Monthly SIP":
-                    "MONTHLY",
+                  "Monthly SIP": "MONTHLY",
                 };
 
-                setInvestmentType(
-                  typeMap[item.title],
-                );
+                setInvestmentType(typeMap[item.title]);
 
                 setShowAmountBox(true);
               }}
             />
           ))}
         </div>
-
+        <GoldSavingOpportunityCard />
         {showAmountBox && (
           <div className="mt-4">
             {/* Input */}
@@ -519,7 +414,6 @@ export default function GoldPage() {
                   placeholder="Enter Amount"
                   className="w-full bg-transparent outline-none text-[20px] text-black placeholder:text-[#C7C7C7]"
                 />
-
               </div>
             </div>
 
@@ -537,15 +431,15 @@ export default function GoldPage() {
                     }}
                     className={`
             px-4 h-[34px] rounded-full border text-[15px] text-[#7A7A7A] whitespace-nowrap transition-all
-            ${selectedChip === item
-                        ? "border-[#D4AF37] bg-[#FFF8E7] text-[#B8860B] font-semibold"
-                        : "border-[#E5E5E5] bg-[#FAFAFA]"
-                      }
+            ${
+              selectedChip === item
+                ? "border-[#D4AF37] bg-[#FFF8E7] text-[#B8860B] font-semibold"
+                : "border-[#E5E5E5] bg-[#FAFAFA]"
+            }
           `}
                   >
                     {item}
                   </button>
-
                 ))}
 
                 {amount && (
@@ -574,11 +468,7 @@ export default function GoldPage() {
         <div className="mt-6 flex justify-center">
           <button
             onClick={handleStartInvestment}
-            disabled={
-              !amount ||
-              isCreatingPayment ||
-              isProcessing
-            }
+            disabled={!amount || isCreatingPayment || isProcessing}
             className="w-[330px] h-[51px] bg-[#111111] rounded-[8px] text-white text-[15px] font-medium flex items-center justify-center"
           >
             {isProcessing
@@ -625,13 +515,7 @@ export default function GoldPage() {
               <button
                 key={tab}
                 onClick={() =>
-                  setSelectedRange(
-                    tab as
-                    | "6M"
-                    | "1Y"
-                    | "3Y"
-                    | "5Y",
-                  )
+                  setSelectedRange(tab as "6M" | "1Y" | "3Y" | "5Y")
                 }
                 className={`
         w-[68px]
@@ -641,10 +525,11 @@ export default function GoldPage() {
         text-[18px]
         font-medium
         transition-all
-        ${selectedRange === tab
-                    ? "bg-[#D4AF37] border-[#D4AF37] text-white"
-                    : "bg-white border-[#E5E7EB] text-[#222222]"
-                  }
+        ${
+          selectedRange === tab
+            ? "bg-[#D4AF37] border-[#D4AF37] text-white"
+            : "bg-white border-[#E5E7EB] text-[#222222]"
+        }
       `}
               >
                 {tab}
@@ -656,9 +541,7 @@ export default function GoldPage() {
             {isChartLoading ? (
               <div className="h-[360px] rounded-[20px] bg-[#F3F4F6] animate-pulse" />
             ) : (
-              <GoldPriceChart
-                data={historicalData?.data || []}
-              />
+              <GoldPriceChart data={historicalData?.data || []} />
             )}
           </div>
         </div>
@@ -682,33 +565,26 @@ export default function GoldPage() {
              * GET BREAKDOWN
              */
 
-            const breakdownResponse =
-              await getGoldBreakdown({
-                amount: sipAmount,
-                type: "RS",
-                rate:
-                  livePrice?.current_price,
-              });
+            const breakdownResponse = await getGoldBreakdown({
+              amount: sipAmount,
+              type: "RS",
+              rate: livePrice?.current_price,
+            });
 
             /*
              * STEP 2
              * BUY VERIFY
              */
 
-            const verifyResponse =
-              await verifyGoldPurchase({
-                rate_id:
-                  livePrice?.rate_id,
+            const verifyResponse = await verifyGoldPurchase({
+              rate_id: livePrice?.rate_id,
 
-                gold_amount:
-                  breakdownResponse?.gold_amount,
+              gold_amount: breakdownResponse?.gold_amount,
 
-                buy_price:
-                  sipAmount,
-              });
+              buy_price: sipAmount,
+            });
 
-            const txId =
-              verifyResponse?.tx_id;
+            const txId = verifyResponse?.tx_id;
 
             if (!txId) {
               setIsProcessing(false);
@@ -719,45 +595,32 @@ export default function GoldPage() {
              * PHONEPE PACKAGE
              */
 
-            const packageName =
-              "com.phonepe.app";
+            const packageName = "com.phonepe.app";
 
             /*
              * STEP 3
              * CREATE SIP INTENT
              */
 
-            const response =
-              await createSipIntent({
-                frequency:
-                  sipType,
+            const response = await createSipIntent({
+              frequency: sipType,
 
-                amount:
-                  sipAmount,
+              amount: sipAmount,
 
-                deviceOS:
-                  "ANDROID",
+              deviceOS: "ANDROID",
 
-                targetApp:
-                  packageName,
+              targetApp: packageName,
 
-                safegoldTxId:
-                  txId,
+              safegoldTxId: txId,
 
-                productType:
-                  "GOLD",
-              });
+              productType: "GOLD",
+            });
 
-            const intentUrl =
-              response?.intentUrl;
+            const intentUrl = response?.intentUrl;
 
-            const merchantOrderId =
-              response?.merchantOrderId;
+            const merchantOrderId = response?.merchantOrderId;
 
-            if (
-              !intentUrl ||
-              !merchantOrderId
-            ) {
+            if (!intentUrl || !merchantOrderId) {
               setIsProcessing(false);
               return;
             }
@@ -766,23 +629,16 @@ export default function GoldPage() {
              * MOBILE APP
              */
 
-            if (
-              typeof window !==
-              "undefined" &&
-              window.ReactNativeWebView
-            ) {
+            if (typeof window !== "undefined" && window.ReactNativeWebView) {
               window.ReactNativeWebView.postMessage(
                 JSON.stringify({
-                  type:
-                    "OPEN_UPI_INTENT",
+                  type: "OPEN_UPI_INTENT",
 
                   url: intentUrl,
 
-                  targetApp:
-                    packageName,
+                  targetApp: packageName,
 
-                  orderId:
-                    merchantOrderId,
+                  orderId: merchantOrderId,
 
                   txId,
                 }),
@@ -792,18 +648,11 @@ export default function GoldPage() {
                * PWA WEB
                */
 
-              localStorage.setItem(
-                "sip_order_id",
-                merchantOrderId,
-              );
+              localStorage.setItem("sip_order_id", merchantOrderId);
 
-              localStorage.setItem(
-                "sip_tx_id",
-                String(txId),
-              );
+              localStorage.setItem("sip_tx_id", String(txId));
 
-              window.location.href =
-                intentUrl;
+              window.location.href = intentUrl;
             }
           } catch (err) {
             console.log(err);
@@ -818,10 +667,7 @@ export default function GoldPage() {
 
       <GoldFeatures />
 
-      <BottomSheet
-        open={showBreakdown}
-        onClose={() => setShowBreakdown(false)}
-      >
+      <BottomSheet open={showBreakdown} onClose={() => setShowBreakdown(false)}>
         <div className="px-4 pt-2">
           <h2 className="text-[20px] font-semibold text-black">
             Investment Breakdown
@@ -830,37 +676,27 @@ export default function GoldPage() {
           <div className="mt-6 rounded-[20px] border border-[#ECECEC] overflow-hidden">
             {/* Gold Value */}
             <div className="flex justify-between items-center px-4 py-2 border-b border-dashed border-[#ECECEC]">
-              <span className="text-[20px] text-[#111111]">
-                Gold Value
-              </span>
+              <span className="text-[20px] text-[#111111]">Gold Value</span>
 
               <span className="text-[20px] font-medium text-[#111111]">
                 ₹
-                {breakdown?.pre_gst_buy_price?.toLocaleString(
-                  "en-IN",
-                  {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  },
-                )}
+                {breakdown?.pre_gst_buy_price?.toLocaleString("en-IN", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </span>
             </div>
 
             {/* GST */}
             <div className="flex justify-between items-center px-4 py-2 border-b border-dashed border-[#ECECEC]">
-              <span className="text-[20px] text-[#111111]">
-                GST (3%)
-              </span>
+              <span className="text-[20px] text-[#111111]">GST (3%)</span>
 
               <span className="text-[20px] font-medium text-[#111111]">
                 ₹
-                {breakdown?.gst_amount?.toLocaleString(
-                  "en-IN",
-                  {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  },
-                )}
+                {breakdown?.gst_amount?.toLocaleString("en-IN", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </span>
             </div>
 
@@ -894,12 +730,7 @@ export default function GoldPage() {
 
             {/* Footer */}
             <div className="flex items-center justify-center gap-2 py-4">
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-              >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                 <path
                   d="M12 2L4 6V12C4 16.418 7.582 20.418 12 22C16.418 20.418 20 16.418 20 12V6L12 2Z"
                   stroke="#9CA3AF"
@@ -919,9 +750,7 @@ export default function GoldPage() {
 
       <BottomSheet
         open={showSipAppsSheet}
-        onClose={() =>
-          setShowSipAppsSheet(false)
-        }
+        onClose={() => setShowSipAppsSheet(false)}
       >
         <div className="px-4 pb-8">
           <h2 className="text-[20px] font-semibold text-black">
@@ -932,9 +761,7 @@ export default function GoldPage() {
             {UPI_APPS.map((app) => (
               <button
                 key={app.id}
-                onClick={() =>
-                  handleSipSetup(app.id)
-                }
+                onClick={() => handleSipSetup(app.id)}
                 className="
             h-[110px]
             rounded-2xl
@@ -948,10 +775,7 @@ export default function GoldPage() {
             transition
           "
               >
-                <img
-                  src={app.icon}
-                  className="w-12 h-12 object-contain"
-                />
+                <img src={app.icon} className="w-12 h-12 object-contain" />
 
                 <p className="mt-3 text-sm font-medium text-black">
                   {app.label}
